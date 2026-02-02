@@ -117,13 +117,23 @@
               class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             {% endif %}
 
-            <div class="skill-hover-overlay d-flex align-items-center justify-content-center">
+            <div class="skill-hover-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+              {% if card.provider.profile.user == request.user %}
+              <button class="btn btn-secondary btn-sm fw-bold mb-2 disabled" style="cursor: not-allowed; opacity: 0.6;">
+                Your Listing
+              </button>
+              {% else %}
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
-                class="btn btn-theme btn-sm fw-bold" {% if card.provider.profile.user == request.user %}
-                onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#d4af37', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });"
-                {% endif %}>
+                class="btn btn-theme btn-sm fw-bold mb-2">
                 Send Request
               </a>
+              {% endif %}
+              {% if card.provider.profile.user != request.user %}
+              <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
+                class="btn btn-outline-light btn-sm fw-bold">
+                Request Swap
+              </a>
+              {% endif %}
             </div>
           </div>
 
@@ -469,6 +479,7 @@
     opacity: 0.4;
     z-index: 0;
   }
+
 
   .shape-1 {
     top: -100px;

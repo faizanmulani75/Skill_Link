@@ -52,6 +52,49 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
                 body=msg,
                 link="/meetings/"
             )
+            # 2. Real-time Status Event (For UI updates)
+            channel_layer = get_channel_layer()
+            
+            # --- Generate Action URLs (Basic) ---
+            from django.urls import reverse
+            action_urls = {}
+            if instance.status == 'accepted':
+                # Both can schedule, but URL is same
+                action_urls['schedule_url'] = reverse('schedule_meeting', args=[instance.id])
+            elif instance.status == 'scheduled':
+                # Zoom Link (passed as raw link if external) and Chat
+                action_urls['start_meeting_url'] = reverse('start_meeting', args=[instance.id]) 
+                action_urls['chat_url'] = reverse('booking_details', args=[instance.id])
+                if instance.meeting_link:
+                    action_urls['join_meeting_url'] = instance.meeting_link
+                # Note: meeting_link is stored on model, but we can't easily reverse it if it's external.
+                # However, start_meeting view redirects to it.
+                
+            async_to_sync(channel_layer.group_send)(
+                f"user_{user_profile.user.id}",
+                {
+                    "type": "status_update",
+                    "booking_id": instance.id,
+                    "new_status": instance.status,
+                    "message": msg,
+                    "action_urls": action_urls,
+                    "is_provider": user_profile == instance.provider,
+                    "unread_count": Notification.objects.filter(user=user_profile.user, is_read=False).count()
+                }
+            )
+
+        # Increment times_taught if status is completed
+        if instance.status == 'completed' and not instance.times_taught_incremented:
+            from skills.models import ProfileSkill
+            try:
+                profile_skill = ProfileSkill.objects.get(profile=instance.provider, skill=instance.skill)
+                profile_skill.times_taught += 1
+                profile_skill.save()
+                
+                # Mark as incremented to prevent double counting
+                Booking.objects.filter(pk=instance.pk).update(times_taught_incremented=True)
+            except ProfileSkill.DoesNotExist:
+                pass
 
         # Increment times_taught if status is completed
         if instance.status == 'completed' and not instance.times_taught_incremented:
