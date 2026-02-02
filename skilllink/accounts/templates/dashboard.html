@@ -270,6 +270,19 @@
 
         <div class="col-md-3">
             <div
+                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Swap Requests</h5>
+                    <p class="display-6 fw-bold">{{ swaps_pending }}</p>
+                    <a href="{% url 'manage_swap_requests' %}"
+                        class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
+                        Swaps</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div
                 class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-3s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Reports & Reviews</h5>

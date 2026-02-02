@@ -216,13 +216,23 @@
               class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             {% endif %}
 
-            <div class="skill-hover-overlay d-flex align-items-center justify-content-center">
+            <div class="skill-hover-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+              {% if card.provider.profile.user == request.user %}
+              <button class="btn btn-secondary btn-sm fw-bold mb-2 disabled" style="cursor: not-allowed; opacity: 0.6;">
+                Your Listing
+              </button>
+              {% else %}
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
-                class="btn btn-theme btn-sm fw-bold" {% if card.provider.profile.user == request.user %}
-                onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#d4af37', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });"
-                {% endif %}>
+                class="btn btn-theme btn-sm fw-bold mb-2">
                 Send Request
               </a>
+              {% endif %}
+              {% if card.provider.profile.user != request.user %}
+              <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
+                class="btn btn-outline-light btn-sm fw-bold">
+                Request Swap
+              </a>
+              {% endif %}
             </div>
           </div>
 
@@ -662,6 +672,7 @@
 
   .text-blue {
     color: var(--blue) !important;
+  }
   .icon-box {
     width: 80px;
     height: 80px;
@@ -686,6 +697,7 @@
 
   .bg-blue-light {
     background-color: var(--blue-light);
+  }
   .bg-blue-light {
     background-color: var(--blue-light);
   }
@@ -696,6 +708,7 @@
 
   .bg-green-light {
     background-color: var(--green-light);
+  }
   .text-green {
     color: var(--green) !important;
   }
@@ -706,6 +719,7 @@
 
   .bg-light-gradient {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  }
   .bg-light-gradient {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   }
@@ -714,7 +728,7 @@
     background-color: var(--bg-light-alt);
   }
 
-  .hover-lift {
+  .hover-lift 
   .bg-light-alt {
     background-color: var(--bg-light-alt);
   }
@@ -726,6 +740,7 @@
   .hover-lift:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  }
   .hover-lift:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
@@ -739,6 +754,7 @@
 
   .text-dark1 {
     color: var(--text-primary) !important;
+  }
   .text-dark1 {
     color: var(--text-primary) !important;
   }
@@ -755,6 +771,7 @@
     font-weight: 800;
     line-height: 1.1;
     color: #fff;
+  }
  
   #hero {
     min-height: 85vh;
@@ -775,6 +792,7 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
 
 
   .text-gradient-gold {
@@ -788,6 +806,7 @@
     color: #cbd5e1;
     max-width: 600px;
     margin: 0 auto;
+  }
   .hero-text {
     color: #cbd5e1;
     max-width: 600px;
@@ -796,6 +815,7 @@
 
   .btn-primary {
     background: linear-gradient(135deg, #f59e0b, #d97706);
+  }
   .btn-primary {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     border: none;
@@ -803,7 +823,7 @@
     transition: transform 0.2s;
   }
 
-  .btn-primary:hover {
+  .btn-primary:hover 
   .btn-primary:hover {
     transform: scale(1.05);
     background: linear-gradient(135deg, #fbbf24, #b45309);
@@ -834,6 +854,7 @@
     width: 400px;
     height: 400px;
     background: #3b82f6;
+  }
   .shape-1 {
     top: -100px;
     right: -100px;
@@ -865,6 +886,7 @@
     background: var(--card-bg);
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
+  }
   .shape-2 {
     bottom: -100px;
     left: -100px;
@@ -894,6 +916,7 @@
     border-radius: 1.5rem;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
   .glass-card {
     border-radius: 1.5rem;
     overflow: hidden;
@@ -903,12 +926,13 @@
   .glass-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
   .glass-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   }
 
-  .card-img-top:hover .card-overlay {
+  .card-img-top:hover .card-overlay 
   .card-img-top:hover .card-overlay {
     opacity: 1;
   }
@@ -971,6 +995,7 @@
 
   .vision-quote {
     color: #475569;
+  }
 
   .card-overlay {
     position: absolute;
@@ -1038,6 +1063,7 @@
     border: 1px solid #e2e8f0;
     max-width: 500px;
     transition: transform 0.3s;
+  }
   .vision-card {
     background: #f8fafc;
     color: #1e293b;
@@ -1049,13 +1075,14 @@
   .vision-card:hover {
     transform: translateX(5px);
     border-color: #cbd5e1;
+  }
   .vision-card:hover {
     transform: translateX(5px);
     border-color: #cbd5e1;
   }
 
 
-  .team-card-wrapper {
+  .team-card-wrapper
 
   .team-card-wrapper {
     perspective: 1000px;
@@ -1063,7 +1090,7 @@
     height: 280px;
   }
 
-  .team-card-inner {
+  .team-card-inner 
   .team-card-inner {
     position: relative;
     width: 100%;
@@ -1076,13 +1103,13 @@
     transform-style: preserve-3d;
   }
 
-  .team-card-wrapper:hover .team-card-inner {
+  .team-card-wrapper:hover .team-card-inner 
   .team-card-wrapper:hover .team-card-inner {
     transform: rotateY(180deg);
   }
 
   .team-front,
-  .team-back {
+  .team-back 
   .team-front,
   .team-back {
     position: absolute;
@@ -1095,6 +1122,7 @@
   .team-back {
     background: linear-gradient(135deg, #121212, #000000);
     color: white;
+  }
   .team-back {
     background: linear-gradient(135deg, #121212, #000000);
     color: white;
@@ -1105,6 +1133,7 @@
     color: white;
     font-size: 1.5rem;
     transition: color 0.3s;
+  }
   .social-icon {
     color: white;
     font-size: 1.5rem;
@@ -1113,6 +1142,7 @@
 
   .social-icon:hover {
     color: var(--gold);
+  }
   .social-icon:hover {
     color: var(--gold);
   }
@@ -1128,6 +1158,7 @@
 
   body.dark-mode .section-heading {
     color: var(--text-primary);
+  }
 
   body.dark-mode {
     --text-primary: #f1f5f9;
@@ -1145,6 +1176,7 @@
 
   body.dark-mode .text-dark {
     color: #f1f5f9 !important;
+  }
   body.dark-mode .text-dark {
     color: #f1f5f9 !important;
   }
@@ -1167,6 +1199,7 @@
   body.dark-mode span,
   body.dark-mode div {
     color: #e2e8f0;
+  }
 
   body.dark-mode .text-dark1 {
     color: #111 !important;
@@ -1189,6 +1222,7 @@
 
   body.dark-mode .text-muted {
     color: #a3a3a3 !important;
+  }
   body.dark-mode .text-muted {
     color: #a3a3a3 !important;
   }
@@ -1206,6 +1240,7 @@
     background: #1A1A1A;
     border: 1px solid #333;
     box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+  }
 
   body.dark-mode .vision-section,
   body.dark-mode .bg-light-gradient {
@@ -1229,6 +1264,7 @@
     background: #1a1a1a;
     color: #e2e8f0;
     border-color: #333;
+  }
 
   body.dark-mode .avatar-circle,
   body.dark-mode .avatar-circle-lg,
@@ -1245,6 +1281,7 @@
 
   body.dark-mode .vision-subtitle {
     color: #e2e8f0;
+  }
   body.dark-mode .text-dark1 {
     color: #111 !important;
   }
@@ -1255,6 +1292,7 @@
 
   body.dark-mode .vision-quote {
     color: #cbd5e1;
+  }
   body.dark-mode .vision-quote {
     color: #cbd5e1;
   }
@@ -1268,6 +1306,7 @@
   body.dark-mode .bg-gold-light {
     background-color: rgba(245, 158, 11, 0.15);
     color: #fbbf24;
+  }
   body.dark-mode .bg-soft-warning {
     background-color: rgba(245, 158, 11, 0.2);
     color: #fbbf24;
@@ -1282,6 +1321,7 @@
   body.dark-mode .bg-blue-light {
     background-color: rgba(59, 130, 246, 0.15);
     color: #60a5fa;
+  }
   body.dark-mode .bg-blue-light {
     background-color: rgba(59, 130, 246, 0.15);
     color: #60a5fa;
@@ -1290,6 +1330,7 @@
   body.dark-mode .bg-green-light {
     background-color: rgba(16, 185, 129, 0.15);
     color: #34d399;
+  }
   body.dark-mode .bg-green-light {
     background-color: rgba(16, 185, 129, 0.15);
     color: #34d399;
@@ -1310,6 +1351,7 @@
 
   .delay-100 {
     animation-delay: 0.1s;
+  }
   body.dark-mode .btn-outline-dark {
     color: #f8fafc;
     border-color: #f8fafc;
@@ -1327,12 +1369,14 @@
 
   .delay-200 {
     animation-delay: 0.2s;
+  }
   .delay-200 {
     animation-delay: 0.2s;
   }
 
   .delay-300 {
     animation-delay: 0.3s;
+  }
   .delay-300 {
     animation-delay: 0.3s;
   }
