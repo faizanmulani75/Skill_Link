@@ -192,6 +192,19 @@
 
         <div class="col-md-3">
             <div
+                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Swap Requests</h5>
+                    <p class="display-6 fw-bold">{{ swaps_pending }}</p>
+                    <a href="{% url 'manage_swap_requests' %}"
+                        class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
+                        Swaps</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div
                 class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-3s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Swap Requests</h5>
@@ -562,7 +575,6 @@
                     const body = card.querySelector('.card-body');
 
                     if (data.new_status === 'accepted') {
-
                         if (data.is_provider && data.action_urls.schedule_url) {
                             const btn = document.createElement('a');
                             btn.href = data.action_urls.schedule_url;
@@ -580,7 +592,6 @@
                             btn.innerText = "Start Zoom";
                             body.appendChild(btn);
                         }
-
                         else if (!data.is_provider && data.action_urls.join_meeting_url) {
                             const btn = document.createElement('a');
                             btn.href = data.action_urls.join_meeting_url;
@@ -589,7 +600,6 @@
                             btn.innerText = "Join Zoom";
                             body.appendChild(btn);
                         }
-
 
                         if (data.action_urls.chat_url) {
                             const btn = document.createElement('a');
@@ -600,7 +610,6 @@
                         }
                     }
                 }
-
 
                 card.classList.add('border-warning');
                 setTimeout(() => card.classList.remove('border-warning'), 2000);

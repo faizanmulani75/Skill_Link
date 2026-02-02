@@ -384,7 +384,6 @@
       if (data.booking_id) {
         const card = document.getElementById(`booking-card-${data.booking_id}`);
         if (card) {
-
           const badge = card.querySelector('.status-badge');
           if (badge) {
             badge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
@@ -441,13 +440,11 @@
                 }
                 btnContainer.innerHTML = html;
               }
-
               else if (data.new_status === 'rejected') {
                 btnContainer.innerHTML = `<span class="text-danger fw-bold animate__animated animate__fadeIn">Booking Rejected</span>`;
               }
             }
           } else {
-
             if (data.new_status === 'accepted') {
               const body = card.querySelector('.card-body');
               if (!body.querySelector('.refresh-hint')) {
