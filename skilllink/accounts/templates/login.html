@@ -3,112 +3,129 @@
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-lg login-card animate__animated animate__fadeInUp" 
-         style="max-width: 400px; width: 100%; border-radius: 18px; border: 2px solid var(--accent-color); background: var(--card-bg);">
-        <div class="card-body p-4">
+  <div class="card shadow-lg login-card animate__animated animate__fadeInUp"
+    style="max-width: 400px; width: 100%; border-radius: 18px; border: 2px solid var(--accent-color); background: var(--card-bg);">
+    <div class="card-body p-4">
 
-            <!-- Header -->
-            <h2 class="text-center mb-4 fw-bold mode-text animate__animated animate__fadeInDown">
-                Login
-            </h2>
+      <!-- Header -->
+      <h2 class="text-center mb-4 fw-bold mode-text animate__animated animate__fadeInDown">
+        Login
+      </h2>
 
-            <!-- Login Form -->
-            <form method="POST" action="{% url 'login' %}" class="animate__animated animate__fadeIn">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="username" class="form-label fw-semibold mode-text">Username</label>
-                      <input type="text" name="username" id="username" class="form-control shadow-sm" placeholder="Enter your username" required>
+      <!-- Login Form -->
+      <form method="POST" action="{% url 'login' %}" class="animate__animated animate__fadeIn">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="username" class="form-label fw-semibold mode-text">Username</label>
+          <input type="text" name="username" id="username" class="form-control shadow-sm"
+            placeholder="Enter your username" required>
 
-                </div>
-
-                <div class="mb-3 position-relative">
-                    <label for="password" class="form-label fw-semibold mode-text">Password</label>
-                    <input type="password" name="password" id="password" class="form-control shadow-sm" placeholder="Enter your password" required>
-                    <span id="togglePassword" class="password-toggle">
-                        <i class="fas fa-eye"></i>
-                    </span>
-                </div>
-
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-warning fw-bold shadow-sm hover-grow">
-                        Login
-                    </button>
-                </div>
-            </form>
-
-            <!-- Register Link -->
-            <p class="text-center mt-3 mode-text">
-                Don’t have an account? 
-                <a href="{% url 'register' %}" class="text-decoration-none fw-semibold accent-link">Register here</a>.
-            </p>
         </div>
+
+        <div class="mb-3 position-relative">
+          <label for="password" class="form-label fw-semibold mode-text">Password</label>
+          <input type="password" name="password" id="password" class="form-control shadow-sm"
+            placeholder="Enter your password" required>
+          <span id="togglePassword" class="password-toggle">
+            <i class="fas fa-eye"></i>
+          </span>
+        </div>
+
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-warning fw-bold shadow-sm hover-grow">
+            Login
+          </button>
+        </div>
+      </form>
+
+      <!-- Register Link -->
+      <p class="text-center mt-3 mode-text">
+        Don’t have an account?
+        <a href="{% url 'register' %}" class="text-decoration-none fw-semibold accent-link">Register here</a>.
+      </p>
     </div>
+  </div>
 </div>
 
 <style>
-/* Font is inherited from base.html */
+  /* Font is inherited from base.html */
 
-/* Theme variables (in sync with base.html dark mode) */
-:root {
-  --card-bg: linear-gradient(135deg, #fff8dc, #fdf5e6);
-  --accent-color: #f1c40f;
-  --text-color: #1a1a1a;
-}
-.dark-mode {
-  --card-bg: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-  --accent-color: #ffd700;
-  --text-color: #f8f9fa;
-}
+  /* Theme variables (in sync with base.html dark mode) */
+  :root {
+    --card-bg: linear-gradient(135deg, #fff8dc, #fdf5e6);
+    --accent-color: #f1c40f;
+    --text-color: #1a1a1a;
+  }
 
-/* Card */
-.login-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-}
-.login-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
+  .dark-mode {
+    --card-bg: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+    --accent-color: #ffd700;
+    --text-color: #f8f9fa;
+  }
 
-/* Inputs */
-input {
-  border-radius: 10px !important;
-  border: 1px solid #ddd !important;
-  padding: 10px !important;
-  transition: all 0.3s ease;
-}
-input:focus {
-  border-color: var(--accent-color) !important;
-  box-shadow: 0 0 8px rgba(241, 196, 15, 0.6) !important;
-}
+  /* Card */
+  .login-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  }
 
-/* Password toggle */
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  top: 40px;
-  cursor: pointer;
-  color: #888;
-  transition: color 0.3s ease;
-}
-.password-toggle:hover { color: var(--accent-color); }
+  .login-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
 
-/* Button hover */
-.hover-grow {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.hover-grow:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-}
+  /* Inputs */
+  input {
+    border-radius: 10px !important;
+    border: 1px solid #ddd !important;
+    padding: 10px !important;
+    transition: all 0.3s ease;
+  }
 
-/* Text modes */
-.mode-text { color: var(--text-color) !important; }
-.accent-link { color: var(--accent-color) !important; }
-.accent-link:hover { text-decoration: underline; }
+  input:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 8px rgba(241, 196, 15, 0.6) !important;
+  }
+
+  /* Password toggle */
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 40px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.3s ease;
+  }
+
+  .password-toggle:hover {
+    color: var(--accent-color);
+  }
+
+  /* Button hover */
+  .hover-grow {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-grow:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Text modes */
+  .mode-text {
+    color: var(--text-color) !important;
+  }
+
+  .accent-link {
+    color: var(--accent-color) !important;
+  }
+
+  .accent-link:hover {
+    text-decoration: underline;
+  }
 </style>
 
 <!-- Animate.css -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <!-- Show/hide password -->
 <script>

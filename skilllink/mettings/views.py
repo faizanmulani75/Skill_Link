@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.models import Profile, Transaction
 from skills.models import Skill, ProfileSkill
-from .models import Booking, BookingHistory, Message
-from skilllink.zoom_utils import create_zoom_meeting
+from .models import Booking, BookingHistory, Message, Report
+from skilllink.zoom_utils import create_zoom_meeting, get_zoom_meeting_status
 import uuid
 from datetime import datetime
 
@@ -65,10 +65,58 @@ def create_booking(request, skill_id, provider_id):
         return redirect('index')
 
 
+def finalize_booking(booking):
+    if booking.tokens_released:
+        return
+    
+    # Just update the status; the post_save signal will handle token transfer
+    booking.status = 'completed'
+    booking.save()
+
+
 # ------------------ LIST BOOKINGS ------------------
 @login_required
 def booking_list(request):
     profile = request.user.profile
+    now = timezone.now()
+
+    # Proactive completion check for meetings that are overdue
+    # Proactive completion check: Zoom status OR Overdue
+    
+    # 1. Check active scheduled meetings (started)
+    active_bookings = Booking.objects.filter(
+        status='scheduled', 
+        tokens_released=False,
+        meeting_started=True
+    )
+
+    for booking in active_bookings:
+        should_complete = False
+        
+        # Check Zoom Status
+        if booking.zoom_meeting_id:
+            status = get_zoom_meeting_status(booking.zoom_meeting_id)
+            if status == "finished":
+                should_complete = True
+        
+        # Time-based fallback (2 hours after start)
+        if not should_complete and booking.meeting_started_at:
+             if now > booking.meeting_started_at + timezone.timedelta(hours=2):
+                 should_complete = True
+        
+        if should_complete:
+            finalize_booking(booking)
+
+    # 2. Check strict overdue (fallback for when meeting_started was not set)
+    overdue_bookings = Booking.objects.filter(
+        status='scheduled', 
+        tokens_released=False,
+        proposed_time__lte=now - timezone.timedelta(hours=2)
+    ).exclude(id__in=[b.id for b in active_bookings])
+    
+    for booking in overdue_bookings:
+        finalize_booking(booking)
+
     bookings_received = Booking.objects.filter(provider=profile).order_by('-requested_at')
     bookings_made = Booking.objects.filter(requester=profile).order_by('-requested_at')
     return render(request, "booking_list.html", {
@@ -96,11 +144,9 @@ def booking_update_status(request, booking_id, action):
     elif action == "reject" and user_profile == booking.provider:
         booking.status = "canceled"
         booking.save()
-        booking.requester.add_tokens(booking.tokens_spent)
-        Transaction.objects.create(
-            user=booking.requester,
-            amount=booking.tokens_spent,
-            transaction_type="refund",
+        booking.requester.add_tokens(
+            booking.tokens_spent,
+            transaction_type='refund',
             description=f"Refund for rejected booking {booking.skill.name}"
         )
         messages.info(request, "Booking rejected. Tokens refunded.")
@@ -108,11 +154,9 @@ def booking_update_status(request, booking_id, action):
     elif action == "cancel" and user_profile == booking.requester:
         booking.status = "canceled"
         booking.save()
-        booking.requester.add_tokens(booking.tokens_spent)
-        Transaction.objects.create(
-            user=booking.requester,
-            amount=booking.tokens_spent,
-            transaction_type="refund",
+        booking.requester.add_tokens(
+            booking.tokens_spent,
+            transaction_type='refund',
             description=f"Refund for canceled booking {booking.skill.name}"
         )
         messages.info(request, "Booking canceled. Tokens refunded.")
@@ -151,6 +195,7 @@ def schedule_meeting(request, booking_id):
         try:
             zoom_response = create_zoom_meeting(topic=f"{booking.skill.name} with {booking.provider.user.username}")
             booking.meeting_link = zoom_response.get("join_url")
+            booking.zoom_meeting_id = zoom_response.get("id")
         except Exception as e:
             messages.error(request, f"Zoom error: {e}")
 
@@ -181,6 +226,7 @@ def start_meeting(request, booking_id):
                 duration=60  # in minutes (optional)
             )
             booking.meeting_link = zoom_response.get("join_url")
+            booking.zoom_meeting_id = zoom_response.get("id")
             booking.meeting_started = True
             booking.meeting_started_at = timezone.now()
             booking.save()
@@ -211,11 +257,9 @@ def complete_meeting(request, booking_id):
         commission = int(booking.tokens_spent * 0.3)
         provider_total = booking.tokens_spent - commission
 
-        booking.provider.add_tokens(provider_total)
-        Transaction.objects.create(
-            user=booking.provider,
-            amount=provider_total,
-            transaction_type="earned",
+        booking.provider.add_tokens(
+            provider_total,
+            transaction_type='earned',
             description=f"Payment for booking {booking.skill.name} (after commission)"
         )
 
@@ -227,6 +271,105 @@ def complete_meeting(request, booking_id):
         messages.info(request, "Tokens already released.")
 
     return redirect("dashboard")
+
+@login_required
+def submit_review(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, requester=request.user.profile)
+    
+    if request.method == "POST":
+        rating = request.POST.get("rating")
+        comment = request.POST.get("comment", "")
+        
+        if rating:
+            rating = int(rating)
+            from .models import Review
+            from django.db.models import Avg
+            from skills.models import ProfileSkill
+
+            # Create the review
+            try:
+                Review.objects.create(
+                    booking=booking,
+                    rating=rating,
+                    comment=comment
+                )
+            except Exception: # Handle IntegrityError (duplicate) or other issues
+                # If review exists (likely from previous failed attempt), we proceed.
+                # We assume XP might have failed, so we add it manually here to recover.
+                booking.provider.add_experience(rating * 10)
+                booking.provider.save()
+                pass
+            booking.review_pending = False
+            
+            # Auto-transfer tokens if not already released
+            if not booking.tokens_released:
+                commission = int(booking.tokens_spent * 0.3)
+                provider_total = booking.tokens_spent - commission
+                
+                booking.provider.add_tokens(
+                    provider_total,
+                    transaction_type='earned',
+                    description=f"Payment for {booking.skill.name} (Review submitted)"
+                )
+                booking.tokens_released = True
+                booking.status = 'completed'
+            
+            booking.save()
+
+            # Update Profile Skill Average Rating
+            profile_skill = ProfileSkill.objects.filter(profile=booking.provider, skill=booking.skill).first()
+            if profile_skill:
+                avg_skill_rating = Review.objects.filter(
+                    booking__provider=booking.provider, 
+                    booking__skill=booking.skill
+                ).aggregate(Avg('rating'))['rating__avg']
+                profile_skill.average_rating = avg_skill_rating or 0.0
+                profile_skill.save()
+
+            # Update Overall Profile Rating
+            profile = booking.provider
+            avg_profile_rating = Review.objects.filter(booking__provider=profile).aggregate(Avg('rating'))['rating__avg']
+            profile.rating = avg_profile_rating or 0.0
+            profile.save()
+
+            messages.success(request, "Review submitted successfully!")
+        else:
+            messages.error(request, "Rating is required.")
+            
+    return redirect("booking_list")
+
+@login_required
+def rate_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, requester=request.user.profile)
+    if not booking.review_pending:
+        messages.info(request, "You have already reviewed this session.")
+        return redirect("booking_list")
+    return render(request, "rate_skill.html", {"booking": booking})
+
+@login_required
+def submit_report(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    if request.user.profile != booking.requester:
+        messages.error(request, "You are not authorized to report this session.")
+        return redirect('booking_list')
+
+    if request.method == "POST":
+        reason = request.POST.get("reason")
+        if reason:
+            from .models import Report
+            Report.objects.create(
+                reporter=request.user.profile,
+                reported_profile=booking.provider,
+                booking=booking,
+                reason=reason
+            )
+            messages.success(request, "Report submitted successfully. We will look into it.")
+        else:
+            messages.error(request, "Reason is required for reporting.")
+
+    return redirect("booking_list")
+
 def booking_success(request):
     return render(request, "booking_success.html")
 
@@ -296,3 +439,25 @@ def get_messages(request, booking_id):
             'is_me': msg.sender == request.user.profile
         })
     return JsonResponse({'status': 'success', 'messages': data})
+
+@login_required
+def user_reports(request):
+    profile = request.user.profile
+    # Reports filed by the user
+    reports_filed = Report.objects.filter(reporter=profile).order_by('-created_at')
+    # Reports filed against the user
+    reports_against = Report.objects.filter(reported_profile=profile).order_by('-created_at')
+    
+    # Reviews given by the user (as requester)
+    from .models import Review
+    reviews_given = Review.objects.filter(booking__requester=profile).select_related('booking', 'booking__provider').order_by('-created_at')
+    
+    # Reviews received by the user (as provider)
+    reviews_received = Review.objects.filter(booking__provider=profile).select_related('booking', 'booking__requester').order_by('-created_at')
+    
+    return render(request, 'user_reports.html', {
+        'reports_filed': reports_filed,
+        'reports_against': reports_against,
+        'reviews_given': reviews_given,
+        'reviews_received': reviews_received,
+    })

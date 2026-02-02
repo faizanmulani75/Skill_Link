@@ -14,19 +14,30 @@ def index(request):
             'profile_skill': ps,
         })
 
-    # Top tutors overall
+    # Top tutors
     from accounts.models import Profile
-    top_tutors = Profile.objects.order_by('-rating')[:4]
+    top_tutors = Profile.objects.filter(rating__gt=0).order_by('-rating')[:4]
 
-    # Static Reviews
-    reviews = [
-        {"name": "yash", "text": "SkillLink helped me learn Python fast!",
-         "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png"},
-        {"name": "Faizan", "text": "Amazing platform for peer-to-peer skill sharing.",
-         "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png"},
-        {"name": "yash madane", "text": "Loved connecting with tutors here.",
-         "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png"},
-    ]
+    # Reviews from Database
+    from mettings.models import Review
+    latest_reviews = Review.objects.select_related('booking__requester__user').order_by('-created_at')[:6]
+    reviews = []
+    for r in latest_reviews:
+        reviews.append({
+            "name": r.booking.requester.user.get_full_name() or r.booking.requester.user.username,
+            "text": r.comment,
+            "profile_pic": r.booking.requester.profile_pic.url if r.booking.requester.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
+            "role": f"Learned {r.booking.skill.name}"
+        })
+
+    # Fallback to static if no reviews yet
+    # if not reviews:
+    #     reviews = [
+    #         {"name": "yash", "text": "SkillLink helped me learn Python fast!",
+    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
+    #         {"name": "Faizan", "text": "Amazing platform for peer-to-peer skill sharing.",
+    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
+    #     ]
 
     # Team Section
     team = [
@@ -56,22 +67,22 @@ def index(request):
                 "instagram": "https://instagram.com/_mustkim_maniyar_585",
             }
         },
-        {
-            "name": "Rushabh Patekar",
-            "role": "UI/UX Designer",
-            "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
-            "social": {
-                "instagram": "https://instagram.com/rushabh_patekar_",
-            }
-        },
-        {
-            "name": "Dipak Supekar",
-            "role": "QA & Testing",
-            "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
-            "social": {
-                "instagram": "https://instagram.com/dipaksupekar_09",
-            }
-        },
+        # {
+        #     "name": "Rushabh Patekar",
+        #     "role": "UI/UX Designer",
+        #     "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
+        #     "social": {
+        #         "instagram": "https://instagram.com/rushabh_patekar_",
+        #     }
+        # },
+        # {
+        #     "name": "Dipak Supekar",
+        #     "role": "QA & Testing",
+        #     "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
+        #     "social": {
+        #         "instagram": "https://instagram.com/dipaksupekar_09",
+        #     }
+        # },
     ]
 
     context = {

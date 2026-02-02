@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Rate your session - SkillLink{% endblock %}
+
+{% block content %}
+<div class="container mt-5 max-w-2xl py-5">
+    <div class="card shadow-lg rating-card border-0 animate__animated animate__fadeInUp">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="text-center mb-4 fw-bold headings-color">Rate your session</h2>
+            <p class="text-center mb-5 sub-text">How was your session for <strong>{{ booking.skill.name }}</strong> with
+                {{ booking.provider.user.username }}?</p>
+
+            <form action="{% url 'submit_review' booking.id %}" method="POST">
+                {% csrf_token %}
+
+                <div class="mb-5 text-center">
+                    <label class="form-label d-block mb-3 fw-semibold headings-color">Overall Rating</label>
+                    <div class="star-rating d-flex justify-content-center flex-row-reverse">
+                        <input type="radio" name="rating" value="5" id="star5" required><label for="star5">★</label>
+                        <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+                        <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+                        <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+                        <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="comment" class="form-label fw-semibold headings-color">Your feedback (optional)</label>
+                    <textarea class="form-control rating-textarea" name="comment" id="comment" rows="4"
+                        placeholder="Tell us about your experience..."></textarea>
+                </div>
+
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold shadow-sm py-3 rounded-pill">Submit
+                        Review</button>
+                    <a href="{% url 'booking_list' %}" class="btn btn-link text-muted mt-2">Maybe later</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rating-card {
+        background-color: #ffffff;
+        border-radius: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .headings-color {
+        color: #212529;
+    }
+
+    .sub-text {
+        color: #6c757d;
+    }
+
+    .rating-textarea {
+        background-color: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 1rem;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .rating-textarea:focus {
+        background-color: #ffffff;
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.1);
+    }
+
+    /* Star Rating Styles */
+    .star-rating {
+        font-size: 3rem;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        color: #dee2e6;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0 0.2rem;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover~label,
+    .star-rating input:checked~label {
+        color: #ffc107;
+        transform: scale(1.1);
+        text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Dark Mode */
+    body.dark-mode .rating-card {
+        background-color: #1a1a1a;
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5) !important;
+    }
+
+    body.dark-mode .headings-color {
+        color: #f8f9fa;
+    }
+
+    body.dark-mode .sub-text {
+        color: #adb5bd;
+    }
+
+    body.dark-mode .rating-textarea {
+        background-color: #2b2b2b;
+        border-color: #3d3d3d;
+        color: #f8f9fa;
+    }
+
+    body.dark-mode .star-rating label {
+        color: #3d3d3d;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+{% endblock %}

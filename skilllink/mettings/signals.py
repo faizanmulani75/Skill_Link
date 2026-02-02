@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from .models import Booking, Message
+from .models import Booking, Message, Review
 from accounts.models import Profile, Notification
 
 @receiver(post_save, sender=Message)
@@ -29,22 +29,9 @@ def broadcast_message(sender, instance, created, **kwargs):
             body=f"From {instance.sender.user.username}: {instance.content[:30]}...",
             link=f"/meetings/booking/{instance.booking.id}/"
         )
-        # Broadcast globally
-        async_to_sync(channel_layer.group_send)(
-            f"user_{recipient.user.id}",
-            {
-                "type": "notification",
-                "notification": {
-                    "title": "New Message",
-                    "body": f"From {instance.sender.user.username}: {instance.content[:30]}...",
-                    "link": f"/meetings/booking/{instance.booking.id}/"
-                }
-            }
-        )
 
 @receiver(post_save, sender=Booking)
 def broadcast_booking_update(sender, instance, created, **kwargs):
-    channel_layer = get_channel_layer()
     if created:
         # Persistent Notification
         Notification.objects.create(
@@ -52,18 +39,6 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
             title="New Booking Request",
             body=f"You have a new request for {instance.skill.name}.",
             link="/meetings/"
-        )
-        # Notify provider about new booking
-        async_to_sync(channel_layer.group_send)(
-            f"user_{instance.provider.user.id}",
-            {
-                "type": "notification",
-                "notification": {
-                    "title": "New Booking Request",
-                    "body": f"You have a new request for {instance.skill.name}.",
-                    "link": "/meetings/"
-                }
-            }
         )
     else:
         # Notify requester/provider about status change
@@ -74,15 +49,6 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
                 title="Booking Update",
                 body=msg,
                 link="/meetings/"
-            )
-            async_to_sync(channel_layer.group_send)(
-                f"user_{user_profile.user.id}",
-                {
-                    "type": "status_update",
-                    "booking_id": instance.id,
-                    "status": instance.status,
-                    "message": msg
-                }
             )
 
 @receiver(post_save, sender=Profile)
@@ -96,3 +62,38 @@ def broadcast_token_update(sender, instance, **kwargs):
             "balance": instance.token_balance
         }
     )
+
+@receiver(post_save, sender=Notification)
+def broadcast_notification(sender, instance, created, **kwargs):
+    if created:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.user.id}",
+            {
+                "type": "notification",
+                "notification": {
+                    "id": instance.id,
+                    "title": instance.title,
+                    "body": instance.body,
+                    "link": instance.link,
+                    "timestamp": instance.timestamp.isoformat()
+                }
+            }
+        )
+
+
+# ---------------- REVIEW XP ----------------
+@receiver(post_save, sender=Review)
+def update_provider_xp(sender, instance, created, **kwargs):
+    """
+    Update provider's experience points and level when they receive a review.
+    XP calculation: rating * 10 (e.g., 5 stars = 50 XP)
+    """
+    if created:
+        provider = instance.booking.provider
+        xp_earned = instance.rating * 10
+        
+        # Add experience and check for level up
+        # Profile.add_experience now handles notifications internally
+        provider.add_experience(xp_earned)
+        provider.save()

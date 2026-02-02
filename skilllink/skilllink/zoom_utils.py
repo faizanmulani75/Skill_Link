@@ -1,6 +1,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from django.conf import settings
+from django.utils import timezone
 
 def get_zoom_access_token():
     url = "https://zoom.us/oauth/token"
@@ -28,13 +29,27 @@ def create_zoom_meeting(topic="Skill Session"):
     }
 
     payload = {
-    "topic": topic,
-    "type": 2,  # scheduled meeting
-    "start_time": "2025-09-14T14:00:00Z",  # ISO format
-    "settings": {
-        "join_before_host": True,
-        "waiting_room": False
-    }
+        "topic": topic,
+        "type": 2,  # scheduled meeting
+        "start_time": timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ"),  # Default to now if not provided
+        "settings": {
+            "join_before_host": True,
+            "waiting_room": False
+        }
     }
     response = requests.post(url, json=payload, headers=headers)
-    return response.json()  # contains join_url & start_url
+    return response.json()  # contains id, join_url & start_url
+
+def get_zoom_meeting_status(meeting_id):
+    token = get_zoom_access_token()
+    url = f"https://api.zoom.us/v2/meetings/{meeting_id}"
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json().get("status")  # 'waiting', 'started', 'finished', etc.
+    return None

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}My Reports - SkillLink{% endblock %}
+
+{% block content %}
+<div class="container mt-5 max-w-4xl">
+    <h1 class="text-center mb-5 fw-bold animate__animated animate__fadeInDown headings-color">My Reports</h1>
+
+    <div class="row">
+        <div class="col-12">
+            {# --- Reports Filed BY the User --- #}
+            <h2 class="fw-semibold mb-3 animate__animated animate__fadeInLeft headings-color">Reports I've Filed</h2>
+            {% for report in reports_filed %}
+            <div class="card shadow mb-4 animate__animated animate__fadeInUp report-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">Report against {{ report.reported_profile.user.username }}</h5>
+                        <span class="badge bg-secondary">{{ report.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <p class="mb-2"><strong>Reason:</strong> {{ report.reason }}</p>
+
+                    {% if report.admin_action_message %}
+                    <div class="admin-response p-3 mt-3 border-start border-4 border-warning bg-light">
+                        <h6 class="fw-bold text-dark"><i class="bi bi-shield-check me-2"></i>Admin Response:</h6>
+                        <p class="mb-0 text-dark italic">{{ report.admin_action_message }}</p>
+                    </div>
+                    {% else %}
+                    <p class="text-muted small"><em>Wait for admin to review...</em></p>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="headings-color">You haven't filed any reports yet.</p>
+            {% endfor %}
+
+            {# --- Reports Filed AGAINST the User --- #}
+            <h2 class="fw-semibold mb-3 mt-5 animate__animated animate__fadeInLeft headings-color">Reports Against Me
+            </h2>
+            {% for report in reports_against %}
+            <div class="card shadow mb-4 animate__animated animate__fadeInUp report-card border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0 text-danger">Notification of Report</h5>
+                        <span class="badge bg-danger">{{ report.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <p class="mb-2">An administrator is reviewing a report regarding your recent activity. Please ensure
+                        you follow the community guidelines.</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="headings-color">No reports have been filed against you. Keep it up!</p>
+            {% endfor %}
+
+            
+
+            {# --- Reviews Received BY the User --- #}
+            <h2 class="fw-semibold mb-3 mt-5 animate__animated animate__fadeInLeft headings-color">Reviews I've Received
+            </h2>
+            {% for review in reviews_received %}
+            <div class="card shadow mb-4 animate__animated animate__fadeInUp report-card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">Review from {{ review.booking.requester.user.username }}</h5>
+                        <span class="badge bg-success">{{ review.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Rating:</strong>
+                        <span class="text-warning">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %} {% endfor %} </span>
+                                <span class="ms-2">({{ review.rating }}/5)</span>
+                    </div>
+                    <p class="mb-2"><strong>Skill:</strong> {{ review.booking.skill.name }}</p>
+                    {% if review.comment %}
+                    <p class="mb-0"><strong>Comment:</strong> {{ review.comment }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="headings-color">You haven't received any reviews yet.</p>
+            {% endfor %}
+            {# --- Reviews Given BY the User --- #}
+            <h2 class="fw-semibold mb-3 mt-5 animate__animated animate__fadeInLeft headings-color">Reviews I've Given
+            </h2>
+            {% for review in reviews_given %}
+            <div class="card shadow mb-4 animate__animated animate__fadeInUp report-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">Review for {{ review.booking.provider.user.username }}</h5>
+                        <span class="badge bg-secondary">{{ review.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Rating:</strong>
+                        <span class="text-warning">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %} {% endfor %} </span>
+                                <span class="ms-2">({{ review.rating }}/5)</span>
+                    </div>
+                    <p class="mb-2"><strong>Skill:</strong> {{ review.booking.skill.name }}</p>
+                    {% if review.comment %}
+                    <p class="mb-0"><strong>Comment:</strong> {{ review.comment }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="headings-color">You haven't given any reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .report-card {
+        border: 2px solid #F0E68C;
+        background-color: #FFF8DC;
+        transition: transform 0.3s ease;
+    }
+
+    .report-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .report-card.border-danger {
+        border-color: #dc3545 !important;
+    }
+
+    .report-card.border-success {
+        border-color: #28a745 !important;
+    }
+
+    .admin-response {
+        background-color: #fcf8e3 !important;
+    }
+
+    body.dark-mode .report-card {
+        background-color: #1a1a1a;
+        border-color: #333;
+        color: #f5f5f5;
+    }
+
+    body.dark-mode .report-card.border-danger {
+        border-color: #dc3545 !important;
+    }
+
+    body.dark-mode .report-card.border-success {
+        border-color: #28a745 !important;
+    }
+
+    body.dark-mode .admin-response {
+        background-color: #2a2a2a !important;
+        color: #fff !important;
+    }
+
+    body.dark-mode .admin-response h6,
+    body.dark-mode .admin-response p {
+        color: #fff !important;
+    }
+
+    .headings-color {
+        color: #212529;
+    }
+
+    body.dark-mode .headings-color {
+        color: #f5f5f5 !important;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

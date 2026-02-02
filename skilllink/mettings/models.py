@@ -32,9 +32,36 @@ class Booking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     meeting_started = models.BooleanField(default=False)
     meeting_started_at = models.DateTimeField(null=True, blank=True)
+    zoom_meeting_id = models.CharField(max_length=100, blank=True, null=True)
+    review_pending = models.BooleanField(default=False)
+    tokens_released = models.BooleanField(default=False) # Adding this back as it was used in code but missing in model definition
 
     def __str__(self):
         return f"{self.requester.user.username} booked {self.skill.name} from {self.provider.user.username}"
+
+
+# ---------------- REVIEW ----------------
+class Review(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='review')
+    rating = models.PositiveIntegerField() # 1-5
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review for Booking {self.booking.id}"
+
+
+# ---------------- REPORT ----------------
+class Report(models.Model):
+    reporter = models.ForeignKey(Profile, related_name='reports_sent', on_delete=models.CASCADE)
+    reported_profile = models.ForeignKey(Profile, related_name='reports_received', on_delete=models.CASCADE)
+    booking = models.ForeignKey(Booking, on_delete=models.SET_NULL, null=True, blank=True, related_name='reports')
+    reason = models.TextField()
+    admin_action_message = models.TextField(blank=True, null=True, help_text="Type a message here to send to the reporter upon saving.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reporter.user.username} against {self.reported_profile.user.username}"
 
 
 # ---------------- BOOKING HISTORY ----------------
@@ -58,3 +85,32 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.user.username} in Booking {self.booking.id}"
+
+# ---------------- SIGNALS ----------------
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Booking)
+def release_tokens_on_completion(sender, instance, created, **kwargs):
+    """
+    Automatically release tokens when a booking is marked as 'completed'.
+    This ensures tokens are transferred even if the status is changed via Django Admin.
+    """
+    if instance.status == 'completed' and not instance.tokens_released:
+        # Calculate split (70% to provider, 30% commission)
+        commission = int(instance.tokens_spent * 0.3)
+        provider_total = instance.tokens_spent - commission
+
+        # Transfer tokens to provider
+        instance.provider.add_tokens(
+            provider_total,
+            transaction_type='earned',
+            description=f"Payment for booking {instance.skill.name} (auto-completed)"
+        )
+
+        # Mark as released to prevent double payment
+        instance.tokens_released = True
+        instance.review_pending = True
+        
+        # Save only the specific fields to avoid recursion loops
+        instance.save(update_fields=['tokens_released', 'review_pending'])

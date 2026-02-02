@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile.user.get_full_name|default:profile.user.username }}'s Profile - SkillLink{% endblock %}
+
+{% block extra_scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('expertiseChart').getContext('2d');
+        const dates = JSON.parse('{{ analytics_dates|safe }}');
+        const earned = JSON.parse('{{ analytics_earned|safe }}');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Expertise Gained (Tokens)',
+                        data: earned,
+                        backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                        borderColor: 'rgba(241, 196, 15, 1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: document.body.classList.contains('dark-mode') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: document.body.classList.contains('dark-mode') ? '#aaa' : '#666'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: document.body.classList.contains('dark-mode') ? '#aaa' : '#666'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Profile Header -->
+    <div class="card shadow-lg mb-5 border-0 profile-header-card animate__animated animate__fadeIn">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center mb-4 mb-md-0">
+                    {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}"
+                        class="rounded-circle border border-4 border-warning shadow"
+                        style="width:180px; height:180px; object-fit:cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center border border-4 border-white shadow mx-auto"
+                        style="width:180px; height:180px; font-size:4rem; font-weight:bold;">
+                        {{ profile.user.username|slice:":1"|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-9 text-center text-md-start">
+                    <div
+                        class="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center gap-3 mb-2">
+                        <h1 class="fw-bold text-dark mb-0">{{ profile.user.get_full_name|default:profile.user.username }}</h1>
+                        {% if profile.verified %}
+                        <span class="badge bg-primary rounded-pill"><i class="bi bi-patch-check-fill me-1"></i>Verified
+                            Mentor</span>
+                        {% endif %}
+                        <span
+                            class="d-inline-flex align-items-center px-3 py-1 bg-gradient-primary rounded-pill text-white fw-bold shadow-sm"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-trophy-fill me-2"></i>Level {{ profile.level }}
+                        </span>
+                    </div>
+                    <p class="text-muted fs-5 mb-2">{{ profile.bio|default:"Passionate about sharing knowledge and skills with others." }}</p>
+
+                    <!-- XP Progress -->
+                    <div class="d-flex align-items-center mb-3 justify-content-center justify-content-md-start">
+                        <small class="fw-bold text-muted me-2">Progress:</small>
+                        <div class="progress flex-grow-1"
+                            style="height: 8px; max-width: 200px; background-color: #e9ecef; border-radius: 4px;">
+                            <div class="progress-bar" role="progressbar"
+                                style="width: {{ profile.get_level_progress }}%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 4px;"
+                                aria-valuenow="{{ profile.get_level_progress }}" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                        <small class="text-muted ms-2">{{ profile.experience_points }} XP</small>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 stats-badges">
+                        <span class="badge bg-light text-dark border p-2 px-3 shadow-sm">
+                            <i class="bi bi-star-fill text-warning me-2"></i>{{ profile.rating|floatformat:1 }} Rating
+                        </span>
+                        <span class="badge bg-light text-dark border p-2 px-3 shadow-sm">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>{{ profile.location|default:"Global" }}
+                        </span>
+                        <span class="badge bg-light text-dark border p-2 px-3 shadow-sm">
+                            <i class="bi bi-calendar3 text-primary me-2"></i>Joined on {{ profile.joined_on|date:"M Y" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Left Column: Skills & Stats -->
+        <div class="col-lg-4">
+            <!-- Skills Card -->
+            <div class="card shadow-sm border-0 mb-4 dashboard-card animate__animated animate__fadeInLeft">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="bi bi-incognito me-2 text-warning"></i>Expertise</h5>
+                    {% if user_skills %}
+                    <div class="d-flex flex-column gap-2">
+                        {% for skill in user_skills %}
+                        <div class="p-3 border rounded-3 bg-light-soft bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold">{{ skill.skill.name }}</span>
+                                <span class="badge bg-warning text-dark fw-semibold">{{ skill.token_cost }}
+                                    Tokens</span>
+                            </div>
+                            <small class="text-muted d-block mb-1">{{ skill.experience_level|capfirst }} • {{ skill.learning_status|capfirst }}</small>
+                            <p class="small mb-3 text-secondary">{{ skill.personal_description|truncatechars:80 }}</p>
+                            <a href="{% url 'create_booking' skill.skill.id profile.id %}"
+                                class="btn btn-warning btn-sm w-100 fw-bold shadow-sm" {% if profile.user==request.user 
+                                    %}
+                                onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#f9b934', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });">
+                                Book This Skill
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No skills listed yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Meeting Stats Card -->
+            <div class="card shadow-sm border-0 dashboard-card animate__animated animate__fadeInLeft animate__delay-1s">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold mb-4">Meeting Activity</h5>
+                    <div class="row">
+                        <div class="col-6 border-end">
+                            <h2 class="display-6 fw-bold text-success">{{ total_meetings_hosted }}</h2>
+                            <p class="text-muted small mb-0">Hosted</p>
+                        </div>
+                        <div class="col-6">
+                            <h2 class="display-6 fw-bold text-primary">{{ total_meetings_attended }}</h2>
+                            <p class="text-muted small mb-0">Attended</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Chart & Reviews -->
+        <div class="col-lg-8">
+            <!-- Expertise Growth Chart -->
+            <div class="card shadow-sm border-0 mb-4 dashboard-card animate__animated animate__fadeInUp">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Expertise
+                        Gains (Last 30 Days)</h5>
+                    <div style="height: 250px;">
+                        <canvas id="expertiseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Received -->
+            <div class="card shadow-sm border-0 dashboard-card animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-4"><i class="bi bi-chat-heart me-2 text-danger"></i>What Learners
+                        Say</h5>
+                    {% if reviews_received %}
+                    <div class="pe-2" style="max-height: 500px; overflow-y: auto;">
+                        {% for review in reviews_received %}
+                        <div class="mb-4 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="small-avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                        style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                        {{ review.booking.requester.user.username|slice:":1"|upper }}
+                                    </div>
+                                    <span
+                                        class="fw-semibold reviewer-name">{{review.booking.requester.user.get_full_name|default:review.booking.requester.user.username }}</span>
+                                </div>
+                                <div class="text-warning">
+                                    {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %} </div>
+                                </div>
+                                <p class="mb-1 text-dark">{{ review.comment }}</p>
+                                <small class="text-muted">{{ review.created_at|date:"F d, Y" }} • for {{ review.booking.skill.name }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-chat-square-dots text-muted display-4"></i>
+                            <p class="text-muted mt-3">No reviews yet for this mentor.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Cards */
+        .dashboard-card,
+        .profile-header-card {
+            background: linear-gradient(145deg, #ffffff, #fcfcfc);
+            border-radius: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header-card {
+            background: linear-gradient(135deg, #fffef5, #ffffff);
+            border: 1px solid #f0d67b;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: #121212 !important;
+            color: #f5f5f5 !important;
+        }
+
+        body.dark-mode .dashboard-card,
+        body.dark-mode .profile-header-card {
+            background: linear-gradient(145deg, #1e1e1e, #252525) !important;
+            border: 1px solid #333 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        body.dark-mode .profile-header-card {
+            border-color: #444 !important;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h3,
+        body.dark-mode h5,
+        body.dark-mode .text-dark {
+            color: #ffffff !important;
+        }
+
+        body.dark-mode .reviewer-name {
+            color: var(--primary-color) !important;
+        }
+
+        body.dark-mode .badge.bg-light {
+            background-color: #2d2d2d !important;
+            color: #e0e0e0 !important;
+            border-color: #444 !important;
+        }
+
+        body.dark-mode .bg-light-soft,
+        body.dark-mode .bg-white,
+        body.dark-mode .bg-light {
+            background-color: #252525 !important;
+            border-color: #444 !important;
+            color: #ddd !important;
+        }
+
+        body.dark-mode .border {
+            border-color: #444 !important;
+        }
+
+        body.dark-mode .border-bottom {
+            border-color: #444 !important;
+        }
+
+        body.dark-mode .text-muted,
+        body.dark-mode .text-secondary {
+            color: #bbb !important;
+        }
+
+        /* 🟢 Restore Meeting Activity Colors in Dark Mode */
+        body.dark-mode .text-success {
+            color: #2ecc71 !important;
+        }
+
+        body.dark-mode .text-primary {
+            color: #3498db !important;
+        }
+
+        /* Premium Warning Badge */
+        .badge.bg-warning.text-dark {
+            background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
+            color: #000 !important;
+            border: none;
+            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
+            padding: 0.5em 0.8em;
+            border-radius: 8px;
+        }
+
+        body.dark-mode .badge.bg-warning.text-dark {
+            box-shadow: 0 4px 12px rgba(241, 196, 15, 0.15);
+        }
+
+        body.dark-mode .small-avatar {
+            background-color: #34495e !important;
+        }
+
+        /* Animations */
+        .animate__animated {
+            --animate-duration: 0.8s;
+        }
+
+        /* Custom spacing */
+        .stats-badges .badge {
+            font-size: 0.95rem;
+        }
+
+
+
+        /* Hide scrollbar but keep functionality */
+        div::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        div::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 10px;
+        }
+
+        body.dark-mode div::-webkit-scrollbar-thumb {
+            background: #444;
+        }
+    </style>
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Dark Mode Toggle Logic (if not in base.html) -->
+    <script>
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+
+    {% endblock %}

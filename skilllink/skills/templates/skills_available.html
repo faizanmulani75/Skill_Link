@@ -44,7 +44,8 @@
             <div class="card-body text-center p-3">
 
                 <!-- Tutor photo + name -->
-                <div class="d-flex align-items-center justify-content-center mb-2">
+                <a href="{% url 'public_profile' username=profile_skill.profile.user.username %}"
+                    class="d-flex align-items-center justify-content-center mb-2 text-decoration-none">
                     {% if profile_skill.profile.profile_pic %}
                     <img src="{{ profile_skill.profile.profile_pic.url }}"
                         class="rounded-circle me-2 tutor-pic shadow-sm" alt="Tutor Pic">
@@ -55,7 +56,7 @@
                     </div>
                     {% endif %}
                     <h6 class="fw-bold mb-0 username">{{ profile_skill.profile.user.username }}</h6>
-                </div>
+                </a>
 
                 <!-- Skill name -->
                 <p class="skill-name fw-semibold mb-2">{{ skill.name }}</p>
@@ -81,7 +82,10 @@
 
                 <!-- Booking button -->
                 <a href="{% url 'create_booking' skill.id profile_skill.profile.id %}"
-                    class="btn btn-warning btn-sm w-100 skill-btn shadow-sm fw-bold">
+                    class="btn btn-warning btn-sm w-100 skill-btn shadow-sm fw-bold" {% if
+                    profile_skill.profile.user == request.user %}
+                    onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#f9b934' });"
+                    >
                     Send Request
                 </a>
 
@@ -101,7 +105,8 @@
                     </div>
                     <div class="modal-body">
                         <!-- Provider Info -->
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                        <a href="{% url 'public_profile' username=profile_skill.profile.user.username %}"
+                            class="d-flex align-items-center mb-3 pb-3 border-bottom text-decoration-none">
                             {% if profile_skill.profile.profile_pic %}
                             <img src="{{ profile_skill.profile.profile_pic.url }}" class="rounded-circle me-3"
                                 style="width: 60px; height: 60px; object-fit: cover; border: 3px solid #f9b934;"
@@ -116,7 +121,7 @@
                                 <h6 class="mb-0 fw-bold">{{ profile_skill.profile.user.username }}</h6>
                                 <small class="text-muted">Skill Provider</small>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Skill Details -->
                         <div class="mb-3">
@@ -167,7 +172,9 @@
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <a href="{% url 'create_booking' skill.id profile_skill.profile.id %}"
-                            class="btn btn-warning fw-bold">
+                            class="btn btn-warning fw-bold" {% if profile_skill.profile.user == request.user %}
+                            onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#f9b934', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });"
+                            {% endif %}>
                             <i class="bi bi-send me-2"></i>Send Request
                         </a>
                     </div>

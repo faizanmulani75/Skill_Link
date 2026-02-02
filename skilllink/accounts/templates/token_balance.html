@@ -19,19 +19,12 @@
           {% csrf_token %}
           <div class="mb-3">
             <label for="tokens" class="form-label fw-semibold text-dark">Amount of Tokens</label>
-            <input 
-              type="number" 
-              name="tokens" 
-              id="tokens" 
-              min="1"
-              class="form-control shadow-sm"
-              placeholder="Enter number of tokens" 
-              required
-              style="border-radius: 12px;">
+            <input type="number" name="tokens" id="tokens" min="1" class="form-control shadow-sm"
+              placeholder="Enter number of tokens" required style="border-radius: 12px;">
           </div>
           <div class="d-grid">
             <button type="submit" class="btn btn-theme fw-bold shadow-sm">
-              ➕ Add Tokens
+              + Add Tokens
             </button>
           </div>
         </form>
@@ -44,32 +37,33 @@
         <h3 class="fw-bold text-dark mb-4">📜 Token History</h3>
 
         {% if token_history %}
-          <div class="table-responsive">
-            <table class="table align-middle table-hover">
-              <thead class="table-warning">
-                <tr>
-                  <th>Date</th>
-                  <th>Type</th>
-                  <th>Description</th>
-                  <th class="text-end">Tokens</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for tx in token_history %}
-                  <tr>
-                    <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
-                    <td class="text-capitalize">{{ tx.transaction_type }}</td>
-                    <td>{{ tx.description }}</td>
-                    <td class="text-end fw-bold {% if tx.transaction_type in 'earned,purchased' %}text-success{% else %}text-danger{% endif %}">
-                      {% if tx.transaction_type in 'earned,purchased' %}+{% else %}-{% endif %}{{ tx.amount }}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+        <div class="table-responsive">
+          <table class="table align-middle table-hover">
+            <thead class="table-warning">
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th class="text-end">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in token_history %}
+              <tr>
+                <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+                <td class="text-capitalize">{{ tx.transaction_type }}</td>
+                <td>{{ tx.description }}</td>
+                <td
+                  class="text-end fw-bold {% if tx.transaction_type in 'earned,purchased' %}text-success{% else %}text-danger{% endif %}">
+                  {% if tx.transaction_type in 'earned,purchased' %}+{% else %}-{% endif %}{{ tx.amount }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
         {% else %}
-          <p class="text-muted">No token history available.</p>
+        <p class="text-muted">No token history available.</p>
         {% endif %}
       </div>
     </div>
@@ -78,99 +72,158 @@
 </div>
 
 <style>
-/* Smooth transitions */
-body, .card, .btn, .table, input {
-  transition: all 0.4s ease-in-out;
-}
+  /* Smooth transitions */
+  body,
+  .card,
+  .btn,
+  .table,
+  input {
+    transition: all 0.4s ease-in-out;
+  }
 
-/* Card Styles */
-.token-card {
-  background: linear-gradient(145deg, #fff8dc, #fffef5);
-  border: 2px solid #f1c40f;
-  border-radius: 18px;
-}
-.token-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.15);
-}
+  /* Card Styles */
+  .token-card {
+    background: linear-gradient(145deg, #fff8dc, #fffef5);
+    border: 2px solid #f1c40f;
+    border-radius: 18px;
+  }
 
-/* Button */
-.btn-theme {
-  background: #f1c40f;
-  color: #222;
-  border-radius: 12px;
-  padding: 10px 0;
-  transition: all 0.3s ease;
-}
-.btn-theme:hover {
-  background: #d4ac0d;
-  color: black;
-  transform: scale(1.05);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.2);
-}
+  .token-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+  }
 
-/* Token Balance Animation */
-.token-balance {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #28a745;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0% { text-shadow: 0 0 5px #28a745; }
-  50% { text-shadow: 0 0 15px #28a745; }
-  100% { text-shadow: 0 0 5px #28a745; }
-}
+  /* Button */
+  .btn-theme {
+    background: #f1c40f;
+    color: #222;
+    border-radius: 12px;
+    padding: 10px 0;
+    transition: all 0.3s ease;
+  }
 
-/* Table Hover */
-.table-hover tbody tr:hover {
-  background-color: #fff8cc !important;
-  transition: 0.3s ease;
-}
+  .btn-theme:hover {
+    background: #d4ac0d;
+    color: black;
+    transform: scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  }
 
-/* --- DARK MODE --- */
-body.dark-mode {
-  background: #121212 !important;
-  color: #f5f5f5 !important;
-}
-body.dark-mode .token-card {
-  background: linear-gradient(145deg, #1e1e1e, #2a2a2a) !important;
-  border: 1px solid #555;
-}
-body.dark-mode h2, 
-body.dark-mode h3, 
-body.dark-mode label, 
-body.dark-mode p {
-  color: #eee !important;
-}
-body.dark-mode .btn-theme {
-  background: #f39c12 !important;
-  color: #000000 !important;
-}
-body.dark-mode .table-warning {
-  background-color: #3a3a3a !important;
-  color: #f1c40f !important;
-}
-body.dark-mode .table-hover tbody tr:hover {
-  background-color: #2f2f2f !important;
-}
-body.dark-mode input {
-  background: #2a2a2a !important;
-  border: 1px solid #444 !important;
-  color: #fff !important;
-}
-body.dark-mode input::placeholder {
-  color: #bbb !important;
-}
+  /* Token Balance Animation */
+  .token-balance {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #28a745;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      text-shadow: 0 0 5px #28a745;
+    }
+
+    50% {
+      text-shadow: 0 0 15px #28a745;
+    }
+
+    100% {
+      text-shadow: 0 0 5px #28a745;
+    }
+  }
+
+  /* Table Hover */
+  .table-hover tbody tr:hover {
+    background-color: #fff8cc !important;
+    transition: 0.3s ease;
+  }
+
+  /* --- DARK MODE --- */
+  body.dark-mode {
+    background: #121212 !important;
+    color: #f5f5f5 !important;
+  }
+
+  body.dark-mode .token-card {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a) !important;
+    border: 1px solid #555;
+  }
+
+  body.dark-mode h2,
+  body.dark-mode h3,
+  body.dark-mode label,
+  body.dark-mode p {
+    color: #eee !important;
+  }
+
+  body.dark-mode .btn-theme {
+    background: #f39c12 !important;
+    color: #000000 !important;
+  }
+
+  body.dark-mode .table-warning {
+    background-color: #3a3a3a !important;
+    color: #f1c40f !important;
+  }
+
+  body.dark-mode .table-hover tbody tr:hover {
+    background-color: #2f2f2f !important;
+  }
+
+  body.dark-mode input {
+    background: #2a2a2a !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+  }
+
+  body.dark-mode input::placeholder {
+    color: #bbb !important;
+  }
+
+  /* Dark Mode Table Styles */
+  body.dark-mode .table {
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+  }
+
+  body.dark-mode .table thead th {
+    background-color: #2c2918 !important;
+    color: #f1c40f !important;
+    border-bottom: 2px solid #555 !important;
+  }
+
+  body.dark-mode .table tbody td {
+    background-color: transparent !important;
+    border-color: #444 !important;
+    color: #e0e0e0 !important;
+  }
+
+  body.dark-mode .table-hover tbody tr:hover td {
+    background-color: #2f2f2f !important;
+    /* color: #fff !important; */
+  }
+
+  body.dark-mode .text-muted {
+    color: #a0a0a0 !important;
+  }
+
+  body.dark-mode .table tbody td.text-success,
+  body.dark-mode .text-success {
+    color: #4ade80 !important;
+  }
+
+  body.dark-mode .table tbody td.text-danger,
+  body.dark-mode .text-danger {
+    color: #f87171 !important;
+  }
 </style>
 
 <!-- Animate.css -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <!-- Dark Mode Sync -->
 <script>
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark-mode");
-}
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+  }
 </script>
 {% endblock %}

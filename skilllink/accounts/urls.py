@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     dashboard, profile_view, profile_edit, login_page, register_page, logout_view,
     token_balance, spend_tokens, payment_success,add_tokens_view,edit_skill,delete_skill,add_skill,
+    public_profile
     # verify_otp,resend_otp
 )
 
@@ -22,6 +23,9 @@ urlpatterns = [
 
 
 
+
+    # user profile
+    path('profile/<str:username>/', public_profile, name='public_profile'),
 
     # Dashboard
     path('dashboard/', dashboard, name='dashboard'),

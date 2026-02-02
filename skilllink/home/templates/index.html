@@ -162,7 +162,9 @@
 
             <div class="skill-hover-overlay d-flex align-items-center justify-content-center">
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
-                class="btn btn-theme btn-sm fw-bold">
+                class="btn btn-theme btn-sm fw-bold" {% if card.provider.profile.user == request.user %}
+                onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#d4af37', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });"
+                {% endif %}>
                 Send Request
               </a>
             </div>
@@ -186,10 +188,10 @@
               <h6 class="fw-bold mb-0 username">{{ card.provider.profile.user.username }}</h6>
             </div>
 
-            <p class="skill-name">{{ card.skill.name }}</p>
-            <div class="d-flex align-items-center justify-content-center gap-1 mt-2">
-              <!-- <i class="bi bi-coin text-warning"></i> -->
-              <span class="badge bg-warning text-dark fw-semibold">{{ card.profile_skill.token_cost }} Tokens Required</span>
+            <p class="skill-name mb-1">{{ card.skill.name }}</p>
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+              <span class="text-warning fw-bold">{{ card.profile_skill.average_rating|floatformat:1 }} ★</span>
+              <span class="badge bg-warning text-dark fw-semibold">{{ card.profile_skill.token_cost }} Tokens</span>
             </div>
           </div>
 
@@ -243,7 +245,8 @@
             Passionate about teaching and sharing skills.
             {% endif %}
           </p>
-          <a href="#" class="btn btn-outline-warning btn-sm rounded-pill px-4">View Profile</a>
+          <a href="{% url 'public_profile' username=tutor.user.username %}"
+            class="btn btn-outline-warning btn-sm rounded-pill px-4">View Profile</a>
         </div>
       </div>
       {% endfor %}
@@ -496,6 +499,8 @@
   .testimonial-section {
     font-family: 'Poppins', sans-serif;
   }
+
+
 
   .section-title {
     color: #222;

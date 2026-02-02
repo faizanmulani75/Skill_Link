@@ -396,6 +396,7 @@ def dashboard(request):
         "pending_bookings_requester": pending_bookings_requester,
         "accepted_bookings_requester": accepted_bookings_requester,
         "past_bookings_requester": past_bookings_requester,
+        "level_progress": profile.get_level_progress(),
         # Analytics
         "analytics_dates": json.dumps(dates, cls=DjangoJSONEncoder),
         "analytics_earned": json.dumps(earned_data, cls=DjangoJSONEncoder),
@@ -404,3 +405,50 @@ def dashboard(request):
         "total_meetings_attended": requester_bookings.filter(status="completed").count(),
     }
     return render(request, "dashboard.html", context)
+
+
+def public_profile(request, username):
+    target_user = get_object_or_404(User, username=username)
+    profile = get_object_or_404(Profile, user=target_user)
+    user_skills = ProfileSkill.objects.filter(profile=profile)
+    
+    # --- Performance/Analytics Logic (similar to dashboard) ---
+    from django.db.models.functions import TruncDate
+    from django.db.models import Sum, Avg
+    import json
+    from django.core.serializers.json import DjangoJSONEncoder
+    
+    # Token Trends (Expertise Gains - Earned Transactions)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    # For public profile, we only show "earned" tokens to demonstrate activity/expertise
+    earned_transactions = Transaction.objects.filter(
+        user=profile, 
+        transaction_type='earned',
+        timestamp__gte=thirty_days_ago
+    ).annotate(date=TruncDate('timestamp')).values('date').annotate(total=Sum('amount')).order_by('date')
+    
+    dates = []
+    earned_data = []
+    for stat in earned_transactions:
+        dates.append(stat['date'].strftime("%Y-%m-%d"))
+        earned_data.append(stat['total'])
+
+    # Reviews received as a provider
+    # Note: We need to import Review here or at the top
+    from mettings.models import Review
+    reviews_received = Review.objects.filter(booking__provider=profile).order_by('-created_at')
+
+    # Meeting Stats
+    total_meetings_hosted = Booking.objects.filter(provider=profile, status="completed").count()
+    total_meetings_attended = Booking.objects.filter(requester=profile, status="completed").count()
+
+    context = {
+        "profile": profile,
+        "user_skills": user_skills,
+        "reviews_received": reviews_received,
+        "total_meetings_hosted": total_meetings_hosted,
+        "total_meetings_attended": total_meetings_attended,
+        "analytics_dates": json.dumps(dates, cls=DjangoJSONEncoder),
+        "analytics_earned": json.dumps(earned_data, cls=DjangoJSONEncoder),
+    }
+    return render(request, "public_profile.html", context)
