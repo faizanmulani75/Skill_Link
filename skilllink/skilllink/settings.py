@@ -145,10 +145,8 @@ CHANNEL_LAYERS = {
 #     }
 # else:
 DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ["DATABASE_URL"],
-        conn_max_age=600,
-        ssl_require=True
+    'default': dj_database_url.parse(
+        'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
     )
 }
 
