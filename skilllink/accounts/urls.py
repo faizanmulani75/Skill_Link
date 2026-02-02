@@ -3,9 +3,6 @@ from .views import (
     dashboard, profile_view, profile_edit, login_page, register_page, logout_view,
     token_balance, spend_tokens, payment_success,add_tokens_view,edit_skill,delete_skill,add_skill,
     public_profile, acknowledge_level_up
-
-    public_profile, acknowledge_level_up
-
     # verify_otp,resend_otp
 )
 urlpatterns = [
@@ -22,6 +19,9 @@ urlpatterns = [
     path("edit-skill/<int:pk>/", edit_skill, name="edit_skill"),
     path("delete-skill/<int:pk>/", delete_skill, name="delete_skill"),
     path("add-skill/", add_skill, name="add_skill"),
+
+    # user profile
+    path('profile/<str:username>/', public_profile, name='public_profile'),
 
     # user profile
     path('profile/<str:username>/', public_profile, name='public_profile'),
