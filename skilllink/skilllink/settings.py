@@ -47,24 +47,24 @@ DEBUG = False
 
 # Host/Domain names that this Django site can serve
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "0.0.0.0",
-    "skill-link-ptzd.onrender.com",
+    # "localhost",
+    # "127.0.0.1",
+    # "0.0.0.0",
+    # "skill-link-ptzd.onrender.com",
 ]
 
+
+
+
 # Security settings - disabled for local development
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SECURE_BROWSER_XSS_FILTER = False
-SECURE_CONTENT_TYPE_NOSNIFF = False
-SECURE_PROXY_SSL_HEADER = None
 
 
-
-
-
+# SECURE_SSL_REDIRECT = False
+# SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
+# SECURE_BROWSER_XSS_FILTER = False
+# SECURE_CONTENT_TYPE_NOSNIFF = False
+# SECURE_PROXY_SSL_HEADER = None
 
 
 # Application definition
@@ -143,9 +143,14 @@ CHANNEL_LAYERS = {
 #         }
 #     }
 # else:
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+#     )
+# }
 DATABASES = {
     'default': dj_database_url.parse(
-        'postgres://postgres:Yash@26012006M@db.dkwfssshgeuohlsjhsmy.supabase.co:5432/postgres?sslmode=require'
+        'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
     )
 }
 
@@ -230,6 +235,7 @@ EMAIL_HOST_PASSWORD = 'bckqhhyppwpyzagb'
 # Production settings (commented out for local development)
 # CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
 # SECURE_HSTS_SECONDS = 31536000
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
