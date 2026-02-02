@@ -125,6 +125,19 @@
 
         <div class="col-md-3">
             <div
+                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Swap Requests</h5>
+                    <p class="display-6 fw-bold">{{ swaps_pending }}</p>
+                    <a href="{% url 'manage_swap_requests' %}"
+                        class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
+                        Swaps</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div
                 class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-3s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Reports & Reviews</h5>
@@ -167,12 +180,13 @@
         <h3 class="mb-3 fw-bold text-dark animate__animated animate__fadeInLeft">Incoming Booking Requests</h3>
         {% if incoming_requests %}
         {% for booking in incoming_requests %}
-        <div class="card mb-3 shadow-sm booking-card animate__animated animate__fadeInUp">
+        <div id="booking-card-{{ booking.id }}"
+            class="card mb-3 shadow-sm booking-card animate__animated animate__fadeInUp">
             <div class="card-body">
                 <p><strong>Requester:</strong> {{
                     booking.requester.user.get_full_name|default:booking.requester.user.username }}</p>
                 <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
-                <p><strong>Status:</strong> <span class="badge bg-info text-dark">{{ booking.status|capfirst }}</span>
+                <p><strong>Status:</strong> <span class="badge bg-info text-dark status-badge">{{ booking.status|capfirst }}</span>
                 </p>
 
                 {% if booking.status == 'pending' %}
@@ -207,10 +221,10 @@
         <h3 class="mb-3 fw-bold text-dark animate__animated animate__fadeInLeft">My Bookings (Requester)</h3>
         {% if bookings_made %}
         {% for booking in bookings_made %}
-        <div class="card mb-3 shadow-sm booking-card animate__animated animate__fadeInUp">
+        <div id="booking-card-{{ booking.id }}"
+            class="card mb-3 shadow-sm booking-card animate__animated animate__fadeInUp">
             <div class="card-body">
-                <p><strong>Provider:</strong> {{
-                    booking.provider.user.get_full_name|default:booking.provider.user.username }}</p>
+                <p><strong>Provider:</strong> {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</p>
                 <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
                 <p><strong>Status:</strong> <span class="badge bg-info text-dark">{{ booking.status|capfirst }}</span>
                 </p>
@@ -435,13 +449,68 @@
 <script>
     window.addEventListener('bookingStatusChanged', function (e) {
         const data = e.detail;
-        const card = document.getElementById(`booking-card-${data.booking_id}`);
-        if (card) {
-            const badge = card.querySelector('.status-badge');
-            if (badge) {
-                badge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        if (data.booking_id) {
+            const card = document.getElementById(`booking-card-${data.booking_id}`);
+            if (card) {
+                const badge = card.querySelector('.status-badge');
+                if (badge) {
+                    badge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
+                    badge.className = 'badge text-dark status-badge';
+                    if (data.new_status === 'accepted') badge.classList.add('bg-success');
+                    else if (data.new_status === 'rejected') badge.classList.add('bg-danger');
+                    else badge.classList.add('bg-info');
+                }
+
+                // Dynamic Buttons
+                if (data.action_urls) {
+                    const existingBtns = card.querySelectorAll('.booking-btn');
+                    existingBtns.forEach(btn => btn.remove());
+                    const body = card.querySelector('.card-body');
+
+                    if (data.new_status === 'accepted') {
+                        // PROVIDER: Show Schedule
+                        if (data.is_provider && data.action_urls.schedule_url) {
+                            const btn = document.createElement('a');
+                            btn.href = data.action_urls.schedule_url;
+                            btn.className = "btn btn-primary btn-sm me-1 booking-btn animate__animated animate__fadeIn";
+                            btn.innerText = "Schedule";
+                            body.appendChild(btn);
+                        }
+                        // REQUESTER: Do nothing (waiting for provider to schedule)
+                    } else if (data.new_status === 'scheduled') {
+                        // PROVIDER: Start Zoom
+                        if (data.is_provider && data.action_urls.start_meeting_url) {
+                            const btn = document.createElement('a');
+                            btn.href = data.action_urls.start_meeting_url;
+                            btn.className = "btn btn-success btn-sm me-1 booking-btn animate__animated animate__fadeIn";
+                            btn.innerText = "Start Zoom";
+                            body.appendChild(btn);
+                        }
+                        // REQUESTER: Join Zoom
+                        else if (!data.is_provider && data.action_urls.join_meeting_url) {
+                            const btn = document.createElement('a');
+                            btn.href = data.action_urls.join_meeting_url;
+                            btn.className = "btn btn-info btn-sm me-1 booking-btn animate__animated animate__fadeIn";
+                            btn.target = "_blank";
+                            btn.innerText = "Join Zoom";
+                            body.appendChild(btn);
+                        }
+
+                        // BOTH: Chat
+                        if (data.action_urls.chat_url) {
+                            const btn = document.createElement('a');
+                            btn.href = data.action_urls.chat_url;
+                            btn.className = "btn btn-primary btn-sm me-1 booking-btn animate__animated animate__fadeIn";
+                            btn.innerText = "Chat";
+                            body.appendChild(btn);
+                        }
+                    }
+                }
+
+                // Highlight
+                card.classList.add('border-warning');
+                setTimeout(() => card.classList.remove('border-warning'), 2000);
             }
-            card.classList.add('animate__animated', 'animate__pulse');
         }
     });
 </script>

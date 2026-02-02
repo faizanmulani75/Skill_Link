@@ -160,13 +160,23 @@
               alt="{{ card.skill.name }}">
             {% endif %}
 
-            <div class="skill-hover-overlay d-flex align-items-center justify-content-center">
+            <div class="skill-hover-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+              {% if card.provider.profile.user == request.user %}
+              <button class="btn btn-secondary btn-sm fw-bold mb-2 disabled" style="cursor: not-allowed; opacity: 0.6;">
+                Your Listing
+              </button>
+              {% else %}
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
-                class="btn btn-theme btn-sm fw-bold" {% if card.provider.profile.user == request.user %}
-                onclick="event.preventDefault(); Swal.fire({ icon: 'error', title: 'Action Not Allowed', text: 'You cannot book your own skill!', confirmButtonColor: '#d4af37', background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' });"
-                {% endif %}>
+                class="btn btn-theme btn-sm fw-bold mb-2">
                 Send Request
               </a>
+              {% endif %}
+              {% if card.provider.profile.user != request.user %}
+              <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
+                class="btn btn-outline-light btn-sm fw-bold">
+                Request Swap
+              </a>
+              {% endif %}
             </div>
           </div>
 
@@ -202,11 +212,11 @@
 
       <!-- Explore More Card -->
       <div class="col-12 col-md-6 col-lg-4">
-        <div class="skill-card explore-card shadow-sm h-100 d-flex align-items-center justify-content-center">
-          <h6 class="fw-bold mb-0">
-            <a href="{% url 'skill_list' %}" class="text-white text-decoration-none">+ Explore More</a>
-          </h6>
-        </div>
+        <a href="{% url 'skill_list' %}" class="text-decoration-none">
+          <div class="skill-card explore-card shadow-sm h-100 d-flex align-items-center justify-content-center">
+            <h6 class="fw-bold mb-0 text-white">+ Explore More</h6>
+          </div>
+        </a>
       </div>
     </div>
   </div>
@@ -351,15 +361,45 @@
 
   /* Explore Card */
   .explore-card {
-    background: #d4af37;
+    background: linear-gradient(135deg, #FFC107, #FFD700);
     border-radius: 15px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
   }
 
-  /* Explore Card */
+  /* Explore Card Hover */
   .explore-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(255, 193, 7, 0.4);
+    background: linear-gradient(135deg, #FFD700, #FFC107);
+  }
+
+  /* Light Shine Effect */
+  .explore-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+  }
+
+  .explore-card:hover::before {
+    left: 100%;
+  }
+
+  .explore-card a {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .explore-card:hover a {
+    transform: scale(1.1);
   }
 
   /* Tutor Card */
@@ -961,10 +1001,12 @@
 
   /* Explore more card */
   .explore-card {
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    background: linear-gradient(135deg, #FFC107, #FFD700);
     color: #fff;
     font-size: 1.1rem;
     transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
 
   .explore-card:hover {

@@ -4,7 +4,10 @@ from skills.models import Skill, ProfileSkill
 def index(request):
 
     # Trending skills (Most taught & highest rated)
-    trending_profile_skills = ProfileSkill.objects.order_by('-times_taught', '-average_rating')[:6]
+    trending_profile_skills = ProfileSkill.objects.order_by('-times_taught', '-average_rating')
+    if request.user.is_authenticated:
+        trending_profile_skills = trending_profile_skills.exclude(profile__user=request.user)
+    trending_profile_skills = trending_profile_skills[:6]
     
     trending_cards = []
     for ps in trending_profile_skills:

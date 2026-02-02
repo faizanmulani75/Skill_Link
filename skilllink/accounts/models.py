@@ -57,6 +57,7 @@ class Profile(models.Model):
     experience_points = models.IntegerField(default=0)
     level = models.IntegerField(default=1)
     verified = models.BooleanField(default=True)
+    desired_skills = models.ManyToManyField('skills.Skill', related_name='wanted_by_profiles', blank=True)
     
     def __str__(self):
         return self.user.username

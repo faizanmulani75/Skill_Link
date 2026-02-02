@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Swap Requests - SkillLink{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="fw-bold mb-4 animate__animated animate__fadeInDown">Manage Swap Requests</h1>
+
+    <div class="row">
+        <!-- Received Swaps -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInLeft swap-card">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h4 class="fw-bold text-primary"><i class="bi bi-inbox-fill me-2"></i>Received Requests</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if received_swaps %}
+                    <div class="list-group list-group-flush swap-list-scroll">
+                        {% for swap in received_swaps %}
+                        <div class="list-group-item p-3 mb-3 border rounded shadow-sm bg-light-soft">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 fw-bold">{{ swap.requester.user.username }}</h5>
+                                <span
+                                    class="badge {% if swap.status == 'pending' %}bg-warning text-dark{% elif swap.status == 'accepted' %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {{ swap.status|capfirst }}
+                                </span>
+                            </div>
+                            <p class="mb-2">
+                                Wants to learn <strong>{{ swap.target_skill.name }}</strong> from you.<br>
+                                Offers to teach <strong>{{ swap.requester_skill.name }}</strong>.
+                            </p>
+                            <small class="text-muted d-block mb-3">{{ swap.created_at|date:"M d, Y H:i" }}</small>
+
+                            {% if swap.status == 'pending' %}
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'respond_to_swap' swap.id 'accept' %}"
+                                    class="btn btn-success btn-sm fw-bold px-3">Accept</a>
+                                <a href="{% url 'respond_to_swap' swap.id 'reject' %}"
+                                    class="btn btn-outline-danger btn-sm fw-bold px-3">Reject</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-5">No received swap requests.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sent Swaps -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInRight swap-card">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                    <h4 class="fw-bold text-secondary"><i class="bi bi-send-fill me-2"></i>Sent Requests</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if sent_swaps %}
+                    <div class="list-group list-group-flush swap-list-scroll">
+                        {% for swap in sent_swaps %}
+                        <div class="list-group-item p-3 mb-3 border rounded shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 fw-bold">To: {{ swap.target.user.username }}</h5>
+                                <span
+                                    class="badge {% if swap.status == 'pending' %}bg-warning text-dark{% elif swap.status == 'accepted' %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {{ swap.status|capfirst }}
+                                </span>
+                            </div>
+                            <p class="mb-1">
+                                You want: <strong>{{ swap.target_skill.name }}</strong><br>
+                                You offer: <strong>{{ swap.requester_skill.name }}</strong>
+                            </p>
+                            <small class="text-muted">{{ swap.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-5">No sent swap requests.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* 🎨 Unified Card Styles (Glassmorphism) */
+    .swap-card {
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        backdrop-filter: blur(12px);
+        transition: all 0.4s ease;
+    }
+
+    .swap-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        background-color: transparent !important;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* 🌙 Dark Mode Support */
+    body.dark-mode .swap-card {
+        background: rgba(25, 25, 25, 0.8);
+        color: #eaeaea;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-mode .card-header {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* List Items in Dark Mode */
+    body.dark-mode .list-group-item {
+        background-color: transparent;
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .text-muted {
+        color: #aaa !important;
+    }
+
+    /* Adjust headings in dark mode */
+    body.dark-mode h4.text-primary {
+        color: #667eea !important;
+    }
+
+    body.dark-mode h4.text-secondary {
+        color: #a0aec0 !important;
+    }
+
+    /* Scrollable Container */
+    .swap-list-scroll {
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 5px;
+        /* Prevent scrollbar overlap */
+    }
+
+    /* Custom Scrollbar for the list */
+    .swap-list-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .swap-list-scroll::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 10px;
+    }
+
+    body.dark-mode .swap-list-scroll::-webkit-scrollbar-thumb {
+        background: #444;
+    }
+</style>
+{% endblock %}

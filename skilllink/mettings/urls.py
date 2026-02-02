@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_booking, booking_list, booking_update_status, schedule_meeting, booking_success,complete_meeting,schedule_meeting,start_meeting, booking_details, send_message, get_messages, submit_review, rate_booking, submit_report, user_reports
+from .views import create_booking, booking_list, booking_update_status, schedule_meeting, booking_success,complete_meeting,schedule_meeting,start_meeting, booking_details, send_message, get_messages, submit_review, rate_booking, submit_report, user_reports, request_swap, manage_swap_requests, respond_to_swap
 
 urlpatterns = [
     path('reports/', user_reports, name='user_reports'),
@@ -16,4 +16,7 @@ urlpatterns = [
     path('<int:booking_id>/submit_review/', submit_review, name='submit_review'),
     path('<int:booking_id>/report/', submit_report, name='submit_report'),
     path('<int:booking_id>/rate/', rate_booking, name='rate_booking'),
+    path('swaps/request/<int:skill_id>/<int:provider_id>/', request_swap, name='request_swap'),
+    path('swaps/', manage_swap_requests, name='manage_swap_requests'),
+    path('swaps/<int:swap_id>/<str:action>/', respond_to_swap, name='respond_to_swap'),
 ]

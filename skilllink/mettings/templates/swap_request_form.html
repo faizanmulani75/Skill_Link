@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Skill Swap - SkillLink{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 animate__animated animate__fadeIn swap-card">
+                <div class="card-header bg-gradient-primary text-white p-4"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3 class="mb-0 fw-bold"><i class="bi bi-arrow-left-right me-2"></i>Request Skill Swap</h3>
+                </div>
+                <div class="card-body p-5">
+                    <h5 class="card-title mb-4">You are requesting to swap skills with <strong>{{ target.user.get_full_name|default:target.user.username }}</strong>.</h5>
+
+                    <div class="alert alert-info shadow-sm mb-4">
+                        <p class="mb-2"><i class="bi bi-info-circle-fill me-2"></i><strong>How it works:</strong></p>
+                        <ul class="mb-0 ps-3">
+                            <li>You will learn <strong>{{ target_skill.name }}</strong> from {{ target.user.username }}.
+                            </li>
+                            <li>In return, you must offer one of your skills to teach them.</li>
+                            <li>If accepted, two separate bookings will be created.</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="offered_skill_id" class="form-label fw-bold">Select the skill you offer:</label>
+                            {% if my_skills %}
+                            <div class="d-grid gap-3">
+                                {% for ps in my_skills %}
+                                <label
+                                    class="skill-option-card p-3 border rounded shadow-sm d-flex align-items-center cursor-pointer">
+                                    <input type="radio" name="offered_skill_id" value="{{ ps.skill.id }}"
+                                        class="form-check-input me-3" required>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ ps.skill.name }}</h6>
+                                        <small class="text-muted">Level: {{ ps.experience_level|capfirst }}</small>
+                                    </div>
+                                    {% if ps.skill.skill_icon %}
+                                    <img src="{{ ps.skill.skill_icon.url }}" alt="{{ ps.skill.name }}"
+                                        class="ms-auto rounded" style="width: 32px; height: 32px;">
+                                    {% endif %}
+                                </label>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Match Not Found!</strong><br>
+                                {% if match_source == 'specific' %}
+                                For <strong>{{ target_skill.name }}</strong>, {{ target.user.username }} only accepts
+                                the following skills in exchange:
+                                <div class="mt-2">
+                                    {% for skill in specific_prefs %}
+                                    <span class="badge bg-primary">{{ skill.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% elif match_source == 'none_set' %}
+                                <div class="text-secondary">
+                                    {{ target.user.username }} has not specified any preferred skills to swap for
+                                    <strong>{{ target_skill.name }}</strong> yet.
+                                    <br><small>You cannot request a swap until they update their preferences.</small>
+                                </div>
+                                {% endif %}
+                                <div class="mt-3">
+                                    <a href="{% url 'add_skill' %}"
+                                        class="btn btn-sm btn-outline-warning text-dark fw-bold">Add a Skill</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-5">
+                            <a href="{% url 'booking_list' %}" class="btn btn-light btn-lg shadow-sm">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm fw-bold px-5" {% if not
+                                my_skills %}disabled>
+                                <i class="bi bi-send-fill me-2"></i>Send Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* 🎨 Unified Card Styles (Glassmorphism) */
+    .swap-card {
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        backdrop-filter: blur(12px);
+        transition: all 0.4s ease;
+    }
+
+    .swap-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        border-top-left-radius: 20px !important;
+        border-top-right-radius: 20px !important;
+    }
+
+    /* 🌙 Dark Mode Support */
+    body.dark-mode .swap-card {
+        background: rgba(25, 25, 25, 0.8);
+        color: #eaeaea;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-mode .form-label {
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .form-select {
+        background-color: #2c2c2c;
+        border-color: #444;
+        color: #fff;
+    }
+
+    body.dark-mode .form-select:focus {
+        background-color: #333;
+        border-color: #667eea;
+        color: #fff;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    body.dark-mode .alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        color: #0dcaf0;
+        border-color: rgba(13, 202, 240, 0.2);
+    }
+
+    body.dark-mode .alert-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border-color: rgba(255, 193, 7, 0.2);
+    }
+
+    body.dark-mode .btn-light {
+        background-color: #333;
+        color: #fff;
+        border-color: #444;
+    }
+
+    body.dark-mode .btn-light:hover {
+        background-color: #444;
+    }
+
+    /* 🔘 Skill Selection Cards */
+    .skill-option-card {
+        transition: all 0.3s ease;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .skill-option-card:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+        border-color: #667eea !important;
+    }
+
+    .skill-option-card input:checked+div {
+        color: #667eea;
+    }
+
+    /* Dark Mode for Options */
+    body.dark-mode .skill-option-card {
+        background-color: #2c2c2c;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .skill-option-card:hover {
+        background-color: #383838;
+        border-color: #FFD700 !important;
+        color: #fff;
+    }
+
+    body.dark-mode .skill-option-card h6 {
+        color: #fff;
+    }
+
+    body.dark-mode .skill-option-card .text-muted {
+        color: #bbb !important;
+    }
+
+    body.dark-mode .skill-option-card input:checked+div {
+        color: #FFD700;
+        /* Gold for selected in dark mode */
+    }
+
+    /* Selected State Class (Added via JS) */
+    .selected-skill-card {
+        border-color: #667eea !important;
+        background-color: #f0f4ff !important;
+        box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+    }
+
+    body.dark-mode .selected-skill-card {
+        border-color: #FFD700 !important;
+        background-color: #3e3e3e !important;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    /* 🔘 Radio Button Visibility */
+    .skill-option-card input[type="radio"] {
+        width: 1.25em;
+        height: 1.25em;
+        accent-color: #667eea;
+        cursor: pointer;
+    }
+
+    body.dark-mode .skill-option-card input[type="radio"] {
+        accent-color: #FFD700;
+        background-color: #444;
+        /* Fallback for transparency */
+        /* border-color: #666; */
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll('.skill-option-card');
+        const inputs = document.querySelectorAll('input[name="offered_skill_id"]');
+
+        function updateSelection() {
+            cards.forEach(card => card.classList.remove('selected-skill-card'));
+            inputs.forEach(input => {
+                if (input.checked) {
+                    input.closest('.skill-option-card').classList.add('selected-skill-card');
+                }
+            });
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('change', updateSelection);
+        });
+    });
+</script>
+{% endblock %}

@@ -29,6 +29,8 @@
           Schedule</a>
         <a href="{% url 'booking_update_status' booking.id 'reject' %}"
           class="btn btn-danger fw-bold shadow-sm">Reject</a>
+        {% elif booking.status == 'accepted' %}
+        <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-primary fw-bold shadow-sm">Schedule Meeting</a>
         {% elif booking.status == 'scheduled' %}
         {% if booking.provider.user == user %}
         <a href="{% url 'start_meeting' booking.id %}" target="_blank" class="btn btn-primary fw-bold shadow-sm">Start
@@ -338,4 +340,85 @@
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 🟢 Listen for real-time booking status changes (dispatched from base.html)
+    window.addEventListener('bookingStatusChanged', function (e) {
+      const data = e.detail;
+      console.log("Booking Update Received:", data);
+
+      if (data.booking_id) {
+        const card = document.getElementById(`booking-card-${data.booking_id}`);
+        if (card) {
+          // 1. Update Badge
+          const badge = card.querySelector('.status-badge');
+          if (badge) {
+            badge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
+
+            // Re-apply classes
+            badge.className = 'badge text-dark status-badge'; // reset
+            if (data.new_status === 'accepted') badge.classList.add('bg-success');
+            else if (data.new_status === 'rejected' || data.new_status === 'cancelled') badge.classList.add('bg-danger');
+            else if (data.new_status === 'pending') badge.classList.add('bg-info');
+            else badge.classList.add('bg-secondary');
+          }
+
+          // 2. Highlight effect to draw attention
+          card.classList.add('animate__animated', 'animate__pulse');
+          card.style.borderColor = "#f9b934"; // Flash border
+
+          setTimeout(() => {
+            card.classList.remove('animate__animated', 'animate__pulse');
+            card.style.borderColor = "";
+          }, 2000);
+
+          // 3. Dynamic Button Swapping
+          if (data.action_urls) {
+            const btnContainer = card.querySelector('.d-flex.flex-wrap.gap-2.mt-2');
+            if (btnContainer) {
+              btnContainer.innerHTML = ''; // Clean slate
+
+              // Accepted -> Schedule
+              if (data.new_status === 'accepted' && data.action_urls.schedule_url) {
+                btnContainer.innerHTML = `<a href="${data.action_urls.schedule_url}" class="btn btn-success fw-bold shadow-sm animate__animated animate__zoomIn">Accept & Schedule</a>`;
+              }
+              // Scheduled -> Start/Chat
+              else if (data.new_status === 'scheduled') {
+                let html = '';
+                if (data.is_provider && data.action_urls.start_meeting_url) {
+                  html += `<a href="${data.action_urls.start_meeting_url}" target="_blank" class="btn btn-primary fw-bold shadow-sm animate__animated animate__zoomIn me-2">Start Zoom</a>`;
+                } else if (!data.is_provider && data.action_urls.join_meeting_url) {
+                  html += `<a href="${data.action_urls.join_meeting_url}" target="_blank" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn me-2">Join Zoom</a>`;
+                } else if (!data.is_provider) {
+                  html += `<span class="badge bg-secondary me-2 animate__animated animate__fadeIn">Scheduled</span>`;
+                }
+
+                if (data.action_urls.chat_url) {
+                  html += `<a href="${data.action_urls.chat_url}" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn">Chat</a>`;
+                }
+                btnContainer.innerHTML = html;
+              }
+              // Rejected
+              else if (data.new_status === 'rejected') {
+                btnContainer.innerHTML = `<span class="text-danger fw-bold animate__animated animate__fadeIn">Booking Rejected</span>`;
+              }
+            }
+          } else {
+            // Fallback if no URLs sent (backwards compat)
+            if (data.new_status === 'accepted') {
+              const body = card.querySelector('.card-body');
+              if (!body.querySelector('.refresh-hint')) {
+                const hint = document.createElement('div');
+                hint.className = "alert alert-warning mt-2 refresh-hint animate__animated animate__fadeIn";
+                hint.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Status changed. <a href="javascript:location.reload()" class="fw-bold">Refresh</a> to proceed.';
+                body.appendChild(hint);
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}

@@ -10,10 +10,15 @@ from django.db.models import Prefetch
 
 def skill_list(request):
     # Prefetch ProfileSkill objects for each skill with related profile and user
+    if request.user.is_authenticated:
+        qs = ProfileSkill.objects.select_related('profile', 'profile__user').exclude(profile__user=request.user)
+    else:
+        qs = ProfileSkill.objects.select_related('profile', 'profile__user')
+
     skills = Skill.objects.prefetch_related(
         Prefetch(
             'profileskill_set',  # reverse relation from Skill to ProfileSkill
-            queryset=ProfileSkill.objects.select_related('profile', 'profile__user')
+            queryset=qs
         )
     ).all()
     

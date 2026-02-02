@@ -50,6 +50,14 @@ class ProfileSkill(models.Model):
     times_taught = models.PositiveIntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
     verified = models.BooleanField(default=False)
+    
+    # --- Exchange Preferences ---
+    desired_exchange_skills = models.ManyToManyField(
+        'Skill', 
+        related_name="wanted_in_exchange_for",
+        blank=True,
+        help_text="Skills the user specifically wants in exchange for teaching this skill."
+    )
 
     # --- Optional Notes ---
     notes = models.TextField(blank=True, null=True)

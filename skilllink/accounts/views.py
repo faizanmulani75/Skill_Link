@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from .models import Profile, Transaction
 from .forms import ProfileForm, ProfileSkillForm
 from skills.models import Skill, ProfileSkill
-from mettings.models import Booking
+from mettings.models import Booking, SwapRequest
 
 # ---------------- EXTERNAL LIBS ----------------
 import random
@@ -268,7 +268,7 @@ def edit_skill(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f"Skill '{skill_instance.skill.name}' updated successfully.")
-            return redirect("edit_profile")
+            return redirect("profile_edit")
     else:
         form = ProfileSkillForm(instance=skill_instance)
     return render(request, "skill_edit.html", {"form": form, "skill_instance": skill_instance})
@@ -403,6 +403,7 @@ def dashboard(request):
         "analytics_spent": json.dumps(spent_data, cls=DjangoJSONEncoder),
         "total_meetings_hosted": provider_bookings.filter(status="completed").count(),
         "total_meetings_attended": requester_bookings.filter(status="completed").count(),
+        "swaps_pending": SwapRequest.objects.filter(target=profile, status='pending').count(),
     }
     return render(request, "dashboard.html", context)
 

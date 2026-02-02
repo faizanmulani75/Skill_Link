@@ -20,6 +20,7 @@
     })();
   </script>
   <title>{% block title %}SkillLink{% endblock %}</title>
+  <link rel="icon" type="image/png" href="/media/LOGO/SkillLink.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -94,13 +95,17 @@
     }
 
     .btn-outline-light {
-      border-color: var(--primary-color);
-      color: var(--primary-color);
+      background: #d4af37;
+      color: #222;
+      border: none;
+      transition: all 0.3s ease;
     }
 
     .btn-outline-light:hover {
       background-color: var(--primary-color);
       color: var(--secondary-color);
+      border-color: var(--primary-color);
+      transform: scale(1.05);
     }
 
     /* 💫 Section Backgrounds */
@@ -803,9 +808,16 @@
           updateBadge(data.unread_count);
         }
         else if (data.type === 'notification') {
-          showGlobalToast(data.notification);
-          addNotificationToList(data.notification, true);
-          updateBadge(data.unread_count);
+          if (data.notification.link && window.location.pathname === data.notification.link) {
+            userSocket.send(JSON.stringify({
+              'type': 'mark_single_read',
+              'notification_id': data.notification.id
+            }));
+          } else {
+            showGlobalToast(data.notification);
+            addNotificationToList(data.notification, true);
+            updateBadge(data.unread_count);
+          }
         }
         else if (data.type === 'status_update') {
           showGlobalToast({ title: "Booking Update", body: data.message, link: "/meetings/" });

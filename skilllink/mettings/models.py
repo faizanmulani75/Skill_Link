@@ -34,7 +34,8 @@ class Booking(models.Model):
     meeting_started_at = models.DateTimeField(null=True, blank=True)
     zoom_meeting_id = models.CharField(max_length=100, blank=True, null=True)
     review_pending = models.BooleanField(default=False)
-    tokens_released = models.BooleanField(default=False) # Adding this back as it was used in code but missing in model definition
+    tokens_released = models.BooleanField(default=False) 
+    times_taught_incremented = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.requester.user.username} booked {self.skill.name} from {self.provider.user.username}"
@@ -86,6 +87,27 @@ class Message(models.Model):
     def __str__(self):
         return f"Message from {self.sender.user.username} in Booking {self.booking.id}"
 
+# ---------------- SKILL SWAP ----------------
+class SwapRequest(models.Model):
+    requester = models.ForeignKey(Profile, related_name='sent_swaps', on_delete=models.CASCADE)
+    target = models.ForeignKey(Profile, related_name='received_swaps', on_delete=models.CASCADE)
+    
+    # The skill the requester WANTS (Target's skill)
+    target_skill = models.ForeignKey(Skill, related_name='swaps_as_target', on_delete=models.CASCADE)
+    
+    # The skill the requester OFFERS (Requester's skill)
+    requester_skill = models.ForeignKey(Skill, related_name='swaps_as_offered', on_delete=models.CASCADE)
+    
+    status = models.CharField(max_length=10, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ], default='pending')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Swap: {self.requester} (offers {self.requester_skill}) <-> {self.target} (offers {self.target_skill})"
 # ---------------- SIGNALS ----------------
 from django.db.models.signals import post_save
 from django.dispatch import receiver

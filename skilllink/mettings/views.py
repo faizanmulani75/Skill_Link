@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.models import Profile, Transaction
 from skills.models import Skill, ProfileSkill
-from .models import Booking, BookingHistory, Message, Report
+from .models import Booking, BookingHistory, Message, Report, SwapRequest
 from skilllink.zoom_utils import create_zoom_meeting, get_zoom_meeting_status
 import uuid
 from datetime import datetime
@@ -461,3 +461,136 @@ def user_reports(request):
         'reviews_given': reviews_given,
         'reviews_received': reviews_received,
     })
+
+# ------------------ SKILL SWAP ------------------
+@login_required
+def request_swap(request, skill_id, provider_id):
+    requester = request.user.profile
+    target = get_object_or_404(Profile, id=provider_id)
+    target_skill = get_object_or_404(Skill, id=skill_id)
+
+    if requester == target:
+        messages.error(request, "You cannot swap with yourself.")
+        return redirect('index')
+
+    if request.method == "POST":
+        requester_skill_id = request.POST.get("offered_skill_id")
+        requester_skill = get_object_or_404(Skill, id=requester_skill_id)
+        
+        # Check if already requested
+        if SwapRequest.objects.filter(requester=requester, target=target, target_skill=target_skill, status='pending').exists():
+             messages.info(request, "Swap request already pending.")
+             return redirect('booking_list')
+
+        SwapRequest.objects.create(
+            requester=requester,
+            target=target,
+            target_skill=target_skill,
+            requester_skill=requester_skill
+        )
+        messages.success(request, "Swap request sent!")
+        return redirect('booking_list')
+
+    # Get skills the requester can offer (that match what the target wants)
+    from skills.models import ProfileSkill
+    
+    # 1. Get all skills the requester is teaching
+    requester_teaching_skills = ProfileSkill.objects.filter(profile=requester, available_for_teaching=True).select_related('skill')
+    
+    # 2. Determine acceptable skills (Specific > Global)
+    target_profile_skill = ProfileSkill.objects.filter(profile=target, skill=target_skill).first()
+    
+    specific_prefs = target_profile_skill.desired_exchange_skills.all() if target_profile_skill else []
+    
+    if specific_prefs:
+        # Strict matching if specific preferences exist
+        acceptable_skill_ids = [s.id for s in specific_prefs]
+        match_source = "specific"
+    else:
+        # No specific preferences -> Strict! No swaps allowed unless specified
+        acceptable_skill_ids = []
+        match_source = "none_set"
+
+    matching_skills = requester_teaching_skills.filter(skill__id__in=acceptable_skill_ids)
+    
+    return render(request, "swap_request_form.html", {
+        "target": target,
+        "target_skill": target_skill,
+        "my_skills": matching_skills,
+        "has_match": matching_skills.exists(),
+        "match_source": match_source,
+        "specific_prefs": specific_prefs
+    })
+
+@login_required
+def manage_swap_requests(request):
+    profile = request.user.profile
+    received_swaps = SwapRequest.objects.filter(target=profile).order_by('-created_at')
+    sent_swaps = SwapRequest.objects.filter(requester=profile).order_by('-created_at')
+    
+    return render(request, "swap_list.html", {
+        "received_swaps": received_swaps,
+        "sent_swaps": sent_swaps
+    })
+
+@login_required
+def respond_to_swap(request, swap_id, action):
+    swap = get_object_or_404(SwapRequest, id=swap_id, target=request.user.profile)
+    
+    if action == "accept":
+        try:
+            with transaction.atomic():
+                 # 1. Requester -> Target (for Target's skill)
+                 ps1 = ProfileSkill.objects.filter(profile=swap.target, skill=swap.target_skill).first()
+                 cost1 = ps1.token_cost if ps1 else 0
+                 
+                 if swap.requester.tokens_balance < cost1:
+                     messages.error(request, f"{swap.requester.user.username} has insufficient tokens for swap.")
+                     return redirect('manage_swap_requests')
+                 
+                 # Deduct from Requester
+                 swap.requester.deduct_tokens(cost1, f"Swap booking for {swap.target_skill.name}")
+
+                 Booking.objects.create(
+                     requester=swap.requester,
+                     provider=swap.target,
+                     skill=swap.target_skill,
+                     status='accepted',
+                     tokens_spent=cost1,
+                     tokens_deducted=True
+                 )
+
+                 # 2. Target -> Requester (for Requester's skill)
+                 ps2 = ProfileSkill.objects.filter(profile=swap.requester, skill=swap.requester_skill).first()
+                 cost2 = ps2.token_cost if ps2 else 0
+                 
+                 if swap.target.tokens_balance < cost2:
+                      messages.error(request, "You have insufficient tokens to accept this swap.")
+                      # Transaction atomic will rollback the first deduction
+                      raise Exception("Insufficient tokens")
+                 
+                 # Deduct from Target
+                 swap.target.deduct_tokens(cost2, f"Swap booking for {swap.requester_skill.name}")
+
+                 Booking.objects.create(
+                     requester=swap.target,
+                     provider=swap.requester,
+                     skill=swap.requester_skill,
+                     status='accepted', 
+                     tokens_spent=cost2,
+                     tokens_deducted=True
+                 )
+
+                 swap.status = 'accepted'
+                 swap.save()
+                 messages.success(request, "Swap accepted! Two bookings created.")
+        except Exception as e:
+            if str(e) != "Insufficient tokens":
+                messages.error(request, f"Error processing swap: {e}")
+             
+    elif action == "reject":
+        swap.status = 'rejected'
+        swap.save()
+        messages.info(request, "Swap request rejected.")
+        
+    return redirect('manage_swap_requests')

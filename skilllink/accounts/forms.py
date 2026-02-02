@@ -16,26 +16,36 @@ class ProfileForm(forms.ModelForm):
         }
 
 class ProfileSkillForm(forms.ModelForm):
-    new_skill_name = forms.CharField(max_length=100, required=False, label="Add New Skill")
+    skill_name = forms.CharField(max_length=100, required=True, label="Skill Name")
 
     class Meta:
         model = ProfileSkill
         fields = [
-            'skill',
             'experience_level',
             'learning_status',
             'personal_description',
             'available_for_teaching',
             'token_cost',
+            'desired_exchange_skills',
         ]
+        widgets = {
+             'desired_exchange_skills': forms.SelectMultiple(attrs={'class': 'form-control', 'size': '5'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['skill_name'].initial = self.instance.skill.name
 
     def save(self, commit=True):
-        skill_instance = self.cleaned_data.get('skill')
-        new_skill_name = self.cleaned_data.get('new_skill_name')
+        skill_name = self.cleaned_data.get('skill_name')
 
-        if new_skill_name:
-            # Create new Skill if not exists
-            skill_instance, created = Skill.objects.get_or_create(name=new_skill_name)
+        if skill_name:
+            # Get or create the Skill object
+            skill_instance, created = Skill.objects.get_or_create(name__iexact=skill_name.strip(), defaults={'name': skill_name.strip()})
+        else:
+            # Fallback (shouldn't happen due to required=True)
+            skill_instance = self.instance.skill
 
         self.instance.skill = skill_instance
         return super().save(commit=commit)
