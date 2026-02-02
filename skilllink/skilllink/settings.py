@@ -145,8 +145,10 @@ CHANNEL_LAYERS = {
 #     }
 # else:
 DATABASES = {
-    'default': dj_database_url.parse(
-        'postgres://postgres:Yash@26012006M@db.dkwfssshgeuohlsjhsmy.supabase.co:5432/postgres?sslmode=require'
+    "default": dj_database_url.parse(
+        os.environ["DATABASE_URL"],
+        conn_max_age=600,
+        ssl_require=True
     )
 }
 
