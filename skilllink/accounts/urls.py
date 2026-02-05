@@ -4,6 +4,8 @@ from .views import (
     token_balance, spend_tokens, payment_success,add_tokens_view,edit_skill,delete_skill,add_skill,
     public_profile, acknowledge_level_up
 
+    public_profile, acknowledge_level_up
+
     # verify_otp,resend_otp
 )
 urlpatterns = [
@@ -24,9 +26,6 @@ urlpatterns = [
     # user profile
     path('profile/<str:username>/', public_profile, name='public_profile'),
 
-    # user profile
-    path('profile/<str:username>/', public_profile, name='public_profile'),
-
     # Dashboard
     path('dashboard/', dashboard, name='dashboard'),
 
@@ -37,6 +36,9 @@ urlpatterns = [
 
     # Payment success callback
     path('token-payment/success/', payment_success, name='payment_success'),
+
+    # Level Up Acknowledgment
+    path('acknowledge-level-up/', acknowledge_level_up, name='acknowledge_level_up'),
 
     # Level Up Acknowledgment
     path('acknowledge-level-up/', acknowledge_level_up, name='acknowledge_level_up'),

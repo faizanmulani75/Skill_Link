@@ -43,8 +43,93 @@
   <!-- Decorative Shapes -->
   <div class="shape shape-1"></div>
   <div class="shape shape-2"></div>
+<!-- HERO SECTION -->
+<section id="hero" class="d-flex align-items-center position-relative overflow-hidden">
+  <!-- Dynamic Background Animation -->
+  <div class="hero-bg-animation"></div>
+
+  <div class="container position-relative z-2 text-center">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <span
+          class="badge bg-warning text-dark1 px-3 py-2 rounded-pill mb-3 fw-bold animate__animated animate__fadeInDown">
+          The Future of Skill Sharing
+        </span>
+        <h1 class="display-3 fw-bold hero-title mb-4 animate__animated animate__fadeInUp">
+          Master New Skills.<br>
+          <span class="text-gradient-gold">Share Your Passion.</span>
+        </h1>
+        <p class="lead hero-text mb-5 animate__animated animate__fadeInUp delay-100">
+          Connect with expert mentors and eager learners in a seamless peer-to-peer exchange platform.
+          No barriers, just learning.
+        </p>
+
+        <div
+          class="d-flex flex-column flex-sm-row justify-content-center gap-3 animate__animated animate__fadeInUp delay-200">
+          <a href="#trending-skills" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg">
+            Start Learning
+          </a>
+          <a href="#how-it-works" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold">
+            How It Works
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative Shapes -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
 </section>
 
+<!-- HOW IT WORKS SECTION -->
+<section id="how-it-works" class="py-6">
+  <div class="container text-center">
+    <h2 class="section-heading mb-2">How SkillLink Works</h2>
+    <p class="text-muted mb-5">Three simple steps to start your journey.</p>
+
+    <div class="row g-4 justify-content-center">
+      <!-- Step 1 -->
+      <div class="col-12 col-md-4">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm hover-lift">
+          <div
+            class="icon-box bg-gold-light text-gold rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-person-badge-fill fs-2"></i>
+          </div>
+          <h4 class="fw-bold mb-3">1. Create Profile</h4>
+          <p class="text-muted">Sign up and showcase your skills. Tell the world what you can teach and what you want to
+            learn.</p>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div class="col-12 col-md-4">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm hover-lift">
+          <div
+            class="icon-box bg-blue-light text-blue rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-search fs-2"></i>
+          </div>
+          <h4 class="fw-bold mb-3">2. Find Mentors</h4>
+          <p class="text-muted">Browse top-rated mentors or trending skills. Send a request to connect or swap skills.
+          </p>
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div class="col-12 col-md-4">
+        <div class="feature-card h-100 p-4 rounded-4 shadow-sm hover-lift">
+          <div
+            class="icon-box bg-green-light text-green rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center">
+            <i class="bi bi-arrow-repeat fs-2"></i>
+          </div>
+          <h4 class="fw-bold mb-3">3. Exchange & Grow</h4>
+          <p class="text-muted">Schedule sessions, learn via video call, and earn tokens to unlock more learning.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRENDING SKILLS -->
+<section id="trending-skills" class="py-6 bg-light-gradient">
 <!-- HOW IT WORKS SECTION -->
 <section id="how-it-works" class="py-6">
   <div class="container text-center">
@@ -102,28 +187,46 @@
       <a href="{% url 'skill_list' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">View All <i
           class="bi bi-arrow-right ms-1"></i></a>
     </div>
+    <div class="d-flex justify-content-between align-items-end mb-5">
+      <div>
+        <h2 class="section-heading mb-1">Trending Skills</h2>
+        <p class="text-muted mb-0">Discover what everyone is learning right now.</p>
+      </div>
+      <a href="{% url 'skill_list' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">View All <i
+          class="bi bi-arrow-right ms-1"></i></a>
+    </div>
 
     <div class="row g-4 justify-content-center">
       {% for card in trending_cards %}
       <div class="col-12 col-md-6 col-lg-4">
         <div class="glass-card h-100 position-relative">
+        <div class="glass-card h-100 position-relative">
           <!-- Skill Image -->
           <div class="card-img-top position-relative overflow-hidden rounded-top-4">
+          <div class="card-img-top position-relative overflow-hidden rounded-top-4">
             {% if card.skill.skill_icon %}
+            <img src="{{ card.skill.skill_icon.url }}" alt="{{ card.skill.name }}"
+              class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             <img src="{{ card.skill.skill_icon.url }}" alt="{{ card.skill.name }}"
               class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             {% else %}
             <img src="https://via.placeholder.com/400x200?text={{ card.skill.name }}" alt="{{ card.skill.name }}"
               class="img-fluid w-100 object-fit-cover" style="height: 200px;">
+            <img src="https://via.placeholder.com/400x200?text={{ card.skill.name }}" alt="{{ card.skill.name }}"
+              class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             {% endif %}
 
             <div class="card-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+            <div class="card-overlay d-flex flex-column align-items-center justify-content-center gap-2">
               {% if card.provider.profile.user == request.user %}
+              <span class="badge bg-secondary">Your Listing</span>
               <span class="badge bg-secondary">Your Listing</span>
               {% else %}
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
                 class="btn btn-warning rounded-pill px-4 fw-bold">Request Session</a>
+                class="btn btn-warning rounded-pill px-4 fw-bold">Request Session</a>
               <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
+                class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
                 class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
               {% endif %}
             </div>
@@ -131,13 +234,29 @@
 
           <div class="card-body p-4">
             <div class="d-flex align-items-center mb-3">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
               {% if card.provider.profile.profile_pic %}
+              <img src="{{ card.provider.profile.profile_pic.url }}"
+                class="rounded-circle me-3 border border-2 border-white shadow-sm"
+                style="width: 45px; height: 45px; object-fit: cover;">
               <img src="{{ card.provider.profile.profile_pic.url }}"
                 class="rounded-circle me-3 border border-2 border-white shadow-sm"
                 style="width: 45px; height: 45px; object-fit: cover;">
               {% else %}
               <div class="avatar-circle me-3">{{ card.provider.profile.user.first_name|slice:":1" }}</div>
+              <div class="avatar-circle me-3">{{ card.provider.profile.user.first_name|slice:":1" }}</div>
               {% endif %}
+              <div>
+                <h6 class="mb-0 fw-bold text-dark">{{ card.provider.profile.user.username }}</h6>
+                <small class="text-muted">Mentor</small>
+              </div>
+              <div class="ms-auto">
+                <span class="badge bg-soft-warning text-warning fw-bold">
+                  <i class="bi bi-star-fill small me-1"></i>{{ card.profile_skill.average_rating|floatformat:1 }}
+                </span>
+              </div>
+            </div>
               <div>
                 <h6 class="mb-0 fw-bold text-dark">{{ card.provider.profile.user.username }}</h6>
                 <small class="text-muted">Mentor</small>
@@ -157,7 +276,16 @@
             </div>
           </div>
         </div>
+            <h5 class="fw-bold mb-2">{{ card.skill.name }}</h5>
+            <div class="d-flex align-items-center text-muted small">
+              <span class="me-3"><i class="bi bi-coin text-warning me-1"></i> {{ card.profile_skill.token_cost }}
+                Tokens</span>
+              <span><i class="bi bi-bar-chart-fill me-1"></i> {{ card.profile_skill.experience_level|title }}</span>
+            </div>
+          </div>
+        </div>
       </div>
+      {% endfor %}
       {% endfor %}
     </div>
   </div>
@@ -167,18 +295,28 @@
 <section id="top-tutors" class="py-6 section-spacer">
   <div class="container text-center">
     <h2 class="section-heading mb-5">Top Rated Mentors</h2>
+<!-- TOP MENTORS -->
+<section id="top-tutors" class="py-6 section-spacer">
+  <div class="container text-center">
+    <h2 class="section-heading mb-5">Top Rated Mentors</h2>
     <div class="row g-4 justify-content-center">
       {% for tutor in top_tutors %}
       <div class="col-12 col-sm-6 col-md-3">
         <div class="feature-card p-4 rounded-4 shadow-sm h-100 hover-lift text-center">
           <div class="position-relative d-inline-block mb-3">
+        <div class="feature-card p-4 rounded-4 shadow-sm h-100 hover-lift text-center">
+          <div class="position-relative d-inline-block mb-3">
             {% if tutor.profile_pic %}
+            <img src="{{ tutor.profile_pic.url }}" class="rounded-circle shadow-lg"
+              style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #fff;">
             <img src="{{ tutor.profile_pic.url }}" class="rounded-circle shadow-lg"
               style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #fff;">
             {% else %}
             <div class="avatar-circle-lg mx-auto shadow-lg">{{ tutor.user.username|slice:":1"|upper }}</div>
+            <div class="avatar-circle-lg mx-auto shadow-lg">{{ tutor.user.username|slice:":1"|upper }}</div>
             {% endif %}
             <span
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark1 border border-white">
               class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark1 border border-white">
               {{ tutor.rating|floatformat:1 }} ★
             </span>
@@ -211,9 +349,43 @@
             {% if review.profile_pic %}
             <img src="{{ review.profile_pic }}" class="rounded-circle me-2"
               style="width: 40px; height: 40px; object-fit: cover;">
+          <h5 class="fw-bold text-dark mb-1">{{ tutor.user.get_full_name|default:tutor.user.username }}</h5>
+          <p class="text-muted small mb-3 text-truncate">{{ tutor.bio|default:"Sharing knowledge & growing together." }}
+          </p>
+          <a href="{% url 'public_profile' username=tutor.user.username %}"
+            class="btn btn-sm btn-outline-dark rounded-pill px-4">View Profile</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="reviews" class="py-6 bg-light-gradient">
+  <div class="container">
+    <h2 class="section-heading text-center mb-5">Community Stories</h2>
+    <div class="row g-4 masonry-grid">
+      {% for review in reviews %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="feature-card p-4 rounded-4 shadow-sm h-100">
+          <div class="d-flex mb-3">
+            <i class="bi bi-quote fs-1 text-warning opacity-25 me-2" style="margin-top: -10px;"></i>
+          </div>
+          <p class="fst-italic text-muted mb-4 opacity-75">"{{ review.text }}"</p>
+          <div class="d-flex align-items-center mt-auto">
+            {% if review.profile_pic %}
+            <img src="{{ review.profile_pic }}" class="rounded-circle me-2"
+              style="width: 40px; height: 40px; object-fit: cover;">
             {% else %}
             <div class="avatar-circle-sm me-2">{{ review.name|slice:":1" }}</div>
+            <div class="avatar-circle-sm me-2">{{ review.name|slice:":1" }}</div>
             {% endif %}
+            <div>
+              <h6 class="mb-0 fw-bold small text-dark">{{ review.name }}</h6>
+              <small class="text-muted x-small">{{ review.role|default:"Learner" }}</small>
+            </div>
+          </div>
             <div>
               <h6 class="mb-0 fw-bold small text-dark">{{ review.name }}</h6>
               <small class="text-muted x-small">{{ review.role|default:"Learner" }}</small>
@@ -332,10 +504,139 @@
   .section-heading {
     font-weight: 800;
     color: var(--text-primary);
+  }
+</style>
+<!-- Vision Section -->
+<section id="our-vision" class="vision-section py-6 position-relative overflow-hidden">
+  <div class="container text-center position-relative z-2">
+    <h2 class="section-heading mb-4 animate__animated animate__fadeInDown">Our Vision</h2>
+
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-8">
+        <h5 class="fw-bold mb-3 vision-subtitle animate__animated animate__fadeIn">We believe:</h5>
+        <p class="lead fst-italic mb-5 vision-quote animate__animated animate__fadeIn">
+          "Every student has something valuable to offer."
+        </p>
+
+        <h5 class="fw-bold mb-4 vision-subtitle animate__animated animate__fadeIn mt-5">Skill Link aims to become a
+          space where:</h5>
+
+        <div class="d-flex flex-column gap-3 align-items-center mb-5">
+          <div class="vision-card p-3 rounded-4 shadow-sm w-100 animate__animated animate__fadeInUp delay-100">
+            <span class="fw-bold text-warning me-2">✓</span> Skills are valued over degrees
+          </div>
+          <div class="vision-card p-3 rounded-4 shadow-sm w-100 animate__animated animate__fadeInUp delay-200">
+            <span class="fw-bold text-warning me-2">✓</span> Experience is built through collaboration
+          </div>
+          <div class="vision-card p-3 rounded-4 shadow-sm w-100 animate__animated animate__fadeInUp delay-300">
+            <span class="fw-bold text-warning me-2">✓</span> Growth comes from community
+          </div>
+        </div>
+
+        <p class="fs-5 fw-semibold text-theme animate__animated animate__fadeInUp delay-200">
+          A place where your profile reflects your journey, not just your qualifications.
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Decorative Background Shape -->
+  <div class="shape shape-3 d-none d-md-block"></div>
+</section>
+
+
+<!-- Team Section -->
+<section id="about-team" class="team-section py-6 bg-light-alt">
+  <div class="container text-center">
+    <h2 class="section-heading mb-5">Our Team Members</h2>
+    <div class="row justify-content-center g-4">
+      {% for member in team %}
+      <div class="{% if forloop.counter <= 3 %}col-md-4 col-sm-6{% else %}col-md-6 col-sm-6{% endif %}">
+        <div class="team-card-wrapper">
+          <div class="team-card-inner">
+            <!-- Front -->
+            <div
+              class="team-front d-flex flex-column align-items-center justify-content-center p-4 rounded-4 shadow-sm">
+              <img src="{{ member.image }}" class="rounded-circle mb-3 border border-3 border-warning shadow-sm"
+                style="width:90px; height:90px; object-fit:cover;">
+              <h5 class="fw-bold mb-1 text-dark">{{ member.name }}</h5>
+              <p class="text-muted mb-0 small">{{ member.role }}</p>
+            </div>
+            <!-- Back -->
+            <div class="team-back d-flex flex-column align-items-center justify-content-center p-4 rounded-4 shadow-sm">
+              <p class="mb-3 fw-bold text-white small text-uppercase ls-1">Connect With</p>
+              <div class="d-flex gap-3">
+                <a href="{{ member.social.instagram }}" target="_blank" class="social-icon"><i
+                    class="bi bi-instagram"></i></a>
+                <a href="{{ member.social.linkedin }}" target="_blank" class="social-icon"><i
+                    class="bi bi-linkedin"></i></a>
+                <a href="{{ member.social.github }}" target="_blank" class="social-icon"><i
+                    class="bi bi-github"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<style>
+  :root {
+    --gold: #f59e0b;
+    --gold-light: #fef3c7;
+    --blue: #3b82f6;
+    --blue-light: #dbeafe;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    --bg-light: #f8fafc;
+    --bg-light-alt: #f1f5f9;
+    --card-bg: #ffffff;
+  }
+
+
+
+
+  .py-6 {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  .ls-1 {
+    letter-spacing: 1px;
+  }
+
+  .section-heading {
+    font-weight: 800;
+    color: var(--text-primary);
     position: relative;
+    display: inline-block;
     display: inline-block;
   }
 
+  .icon-box {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+
+  .text-gold {
+    color: var(--gold) !important;
+  }
+
+  .bg-gold-light {
+    background-color: var(--gold-light);
+  }
+
+  .text-blue {
+    color: var(--blue) !important;
   .icon-box {
     width: 80px;
     height: 80px;
@@ -360,8 +661,16 @@
 
   .bg-blue-light {
     background-color: var(--blue-light);
+  .bg-blue-light {
+    background-color: var(--blue-light);
   }
 
+  .text-green {
+    color: var(--green) !important;
+  }
+
+  .bg-green-light {
+    background-color: var(--green-light);
   .text-green {
     color: var(--green) !important;
   }
@@ -372,8 +681,15 @@
 
   .bg-light-gradient {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  .bg-light-gradient {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   }
 
+  .bg-light-alt {
+    background-color: var(--bg-light-alt);
+  }
+
+  .hover-lift {
   .bg-light-alt {
     background-color: var(--bg-light-alt);
   }
@@ -385,16 +701,35 @@
   .hover-lift:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
   }
 
+  .hover-scale:hover {
+    transform: scale(1.05);
   .hover-scale:hover {
     transform: scale(1.05);
   }
 
   .text-dark1 {
     color: var(--text-primary) !important;
+  .text-dark1 {
+    color: var(--text-primary) !important;
   }
 
+ 
+  #hero {
+    min-height: 85vh;
+    background: radial-gradient(circle at top right, #111111, #000000);
+    color: #fff;
+    padding-top: 80px;
+  }
+
+  .hero-title {
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
  
   #hero {
     min-height: 85vh;
@@ -415,10 +750,19 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-
-
+  .hero-text {
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto;
   .hero-text {
     color: #cbd5e1;
     max-width: 600px;
@@ -427,10 +771,14 @@
 
   .btn-primary {
     background: linear-gradient(135deg, #f59e0b, #d97706);
+  .btn-primary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
     border: none;
+    transition: transform 0.2s;
     transition: transform 0.2s;
   }
 
+  .btn-primary:hover {
   .btn-primary:hover {
     transform: scale(1.05);
     background: linear-gradient(135deg, #fbbf24, #b45309);
@@ -443,8 +791,24 @@
     filter: blur(80px);
     opacity: 0.4;
     z-index: 0;
+    background: linear-gradient(135deg, #fbbf24, #b45309);
   }
 
+
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    z-index: 0;
+  }
+
+  .shape-1 {
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: #3b82f6;
   .shape-1 {
     top: -100px;
     right: -100px;
@@ -476,8 +840,35 @@
     background: var(--card-bg);
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
+  .shape-2 {
+    bottom: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    background: #f59e0b;
   }
 
+  .shape-3 {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+
+  .feature-card,
+  .glass-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+  }
+
+  .glass-card {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   .glass-card {
     border-radius: 1.5rem;
     overflow: hidden;
@@ -487,11 +878,74 @@
   .glass-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  .glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   }
 
   .card-img-top:hover .card-overlay {
+  .card-img-top:hover .card-overlay {
     opacity: 1;
   }
+
+  .card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .avatar-circle,
+  .avatar-circle-lg,
+  .avatar-circle-sm {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar-circle {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+  }
+
+  .avatar-circle-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .avatar-circle-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .bg-soft-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+  }
+
+
+  .vision-section {
+    background-color: #ffffff;
+  }
+
+  .vision-subtitle {
+    color: #334155;
+  }
+
+  .vision-quote {
+    color: #475569;
 
   .card-overlay {
     position: absolute;
@@ -559,8 +1013,17 @@
     border: 1px solid #e2e8f0;
     max-width: 500px;
     transition: transform 0.3s;
+  .vision-card {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    max-width: 500px;
+    transition: transform 0.3s;
   }
 
+  .vision-card:hover {
+    transform: translateX(5px);
+    border-color: #cbd5e1;
   .vision-card:hover {
     transform: translateX(5px);
     border-color: #cbd5e1;
@@ -568,13 +1031,20 @@
 
 
   .team-card-wrapper {
+
+  .team-card-wrapper {
     perspective: 1000px;
+    height: 280px;
     height: 280px;
   }
 
   .team-card-inner {
+  .team-card-inner {
     position: relative;
     width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
     height: 100%;
     text-align: center;
     transition: transform 0.8s;
@@ -582,9 +1052,12 @@
   }
 
   .team-card-wrapper:hover .team-card-inner {
+  .team-card-wrapper:hover .team-card-inner {
     transform: rotateY(180deg);
   }
 
+  .team-front,
+  .team-back {
   .team-front,
   .team-back {
     position: absolute;
@@ -597,6 +1070,9 @@
   .team-back {
     background: linear-gradient(135deg, #121212, #000000);
     color: white;
+  .team-back {
+    background: linear-gradient(135deg, #121212, #000000);
+    color: white;
     transform: rotateY(180deg);
   }
 
@@ -604,8 +1080,14 @@
     color: white;
     font-size: 1.5rem;
     transition: color 0.3s;
+  .social-icon {
+    color: white;
+    font-size: 1.5rem;
+    transition: color 0.3s;
   }
 
+  .social-icon:hover {
+    color: var(--gold);
   .social-icon:hover {
     color: var(--gold);
   }
@@ -621,9 +1103,23 @@
 
   body.dark-mode .section-heading {
     color: var(--text-primary);
+
+  body.dark-mode {
+    --text-primary: #f1f5f9;
+    --text-muted: #a3a3a3;
+    --bg-light: #000000;
+    --bg-light-alt: #0a0a0a;
+    --card-bg: #121212;
+  }
+
+  body.dark-mode .section-heading {
+    color: var(--text-primary);
   }
 
 
+
+  body.dark-mode .text-dark {
+    color: #f1f5f9 !important;
   body.dark-mode .text-dark {
     color: #f1f5f9 !important;
   }
@@ -646,12 +1142,45 @@
   body.dark-mode span,
   body.dark-mode div {
     color: #e2e8f0;
+
+  body.dark-mode .text-dark1 {
+    color: #111 !important;
+  }
+
+  body.dark-mode h1,
+  body.dark-mode h2,
+  body.dark-mode h3,
+  body.dark-mode h4,
+  body.dark-mode h5,
+  body.dark-mode h6 {
+    color: #f1f5f9 !important;
+  }
+
+  body.dark-mode p,
+  body.dark-mode span,
+  body.dark-mode div {
+    color: #e2e8f0;
   }
 
   body.dark-mode .text-muted {
     color: #a3a3a3 !important;
+  body.dark-mode .text-muted {
+    color: #a3a3a3 !important;
   }
 
+
+  body.dark-mode .vision-section,
+  body.dark-mode .bg-light-gradient {
+    background: #000000 !important;
+  }
+
+
+  body.dark-mode .feature-card,
+  body.dark-mode .glass-card,
+  body.dark-mode .team-front {
+    background: #1A1A1A;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
 
   body.dark-mode .vision-section,
   body.dark-mode .bg-light-gradient {
@@ -675,8 +1204,22 @@
     background: #1a1a1a;
     color: #e2e8f0;
     border-color: #333;
+
+  body.dark-mode .avatar-circle,
+  body.dark-mode .avatar-circle-lg,
+  body.dark-mode .avatar-circle-sm,
+  body.dark-mode .vision-card {
+    background: #1a1a1a;
+    color: #e2e8f0;
+    border-color: #333;
   }
 
+  body.dark-mode .text-dark1 {
+    color: #111 !important;
+  }
+
+  body.dark-mode .vision-subtitle {
+    color: #e2e8f0;
   body.dark-mode .text-dark1 {
     color: #111 !important;
   }
@@ -687,8 +1230,19 @@
 
   body.dark-mode .vision-quote {
     color: #cbd5e1;
+  body.dark-mode .vision-quote {
+    color: #cbd5e1;
   }
 
+  body.dark-mode .bg-soft-warning {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+  }
+
+
+  body.dark-mode .bg-gold-light {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
   body.dark-mode .bg-soft-warning {
     background-color: rgba(245, 158, 11, 0.2);
     color: #fbbf24;
@@ -703,14 +1257,34 @@
   body.dark-mode .bg-blue-light {
     background-color: rgba(59, 130, 246, 0.15);
     color: #60a5fa;
+  body.dark-mode .bg-blue-light {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
   }
 
+  body.dark-mode .bg-green-light {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
   body.dark-mode .bg-green-light {
     background-color: rgba(16, 185, 129, 0.15);
     color: #34d399;
   }
 
 
+
+  body.dark-mode .btn-outline-dark {
+    color: #f8fafc;
+    border-color: #f8fafc;
+  }
+
+  body.dark-mode .btn-outline-dark:hover {
+    background: #f8fafc;
+    color: #0f172a;
+  }
+
+
+  .delay-100 {
+    animation-delay: 0.1s;
   body.dark-mode .btn-outline-dark {
     color: #f8fafc;
     border-color: #f8fafc;
@@ -728,8 +1302,12 @@
 
   .delay-200 {
     animation-delay: 0.2s;
+  .delay-200 {
+    animation-delay: 0.2s;
   }
 
+  .delay-300 {
+    animation-delay: 0.3s;
   .delay-300 {
     animation-delay: 0.3s;
   }
