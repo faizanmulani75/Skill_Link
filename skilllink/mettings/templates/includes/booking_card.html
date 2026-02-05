@@ -1,0 +1,65 @@
+<div class="card shadow mb-4 animate__animated animate__fadeInUp booking-card" id="booking-card-{{ booking.id }}">
+    <div class="card-body">
+        <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
+        <p><strong>Status:</strong> <span
+                class="badge text-dark status-badge {% if booking.status == 'accepted' %}bg-success{% elif booking.status == 'rejected' or booking.status == 'cancelled' or booking.status == 'canceled' %}bg-danger{% elif booking.status == 'pending' %}bg-warning{% elif booking.status == 'scheduled' %}bg-primary{% elif booking.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %}">{{ booking.status|capfirst }}</span></p>
+
+        {% if booking.provider.user == user %}
+        <p><strong>Requester:</strong> {{ booking.requester.user.get_full_name|default:booking.requester.user.username }}</p>
+        {% else %}
+        <p><strong>Provider:</strong> {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+        </p>
+        {% endif %}
+
+        <p><strong>Proposed Times:</strong></p>
+        <ul>
+            {% for h in booking.history.all %}
+            <li>{{ h.proposed_time|date:"D, d M Y h:i A" }}</li>
+            {% endfor %}
+        </ul>
+
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            {% if booking.status == 'pending' %}
+            {% if booking.provider.user == user %}
+            {# Provider Actions #}
+            <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-success fw-bold shadow-sm">Accept &
+                Schedule</a>
+            <a href="{% url 'booking_update_status' booking.id 'reject' %}"
+                class="btn btn-danger fw-bold shadow-sm">Reject</a>
+            {% else %}
+            {# Requester Actions #}
+            <a href="{% url 'booking_update_status' booking.id 'cancel' %}"
+                class="btn btn-warning fw-bold shadow-sm">Cancel</a>
+            {% endif %}
+
+            {% elif booking.status == 'accepted' %}
+            {% if booking.provider.user == user %}
+            <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-primary fw-bold shadow-sm">Schedule
+                Meeting</a>
+            {% endif %}
+            <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
+
+            {% elif booking.status == 'scheduled' %}
+            {% if booking.provider.user == user %}
+            <a href="{% url 'start_meeting' booking.id %}" target="_blank"
+                class="btn btn-primary fw-bold shadow-sm">Start Zoom</a>
+            <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
+            {% else %}
+            {% if booking.meeting_started %}
+            <a href="{% url 'start_meeting' booking.id %}" target="_blank"
+                class="btn btn-primary fw-bold shadow-sm">Join Zoom</a>
+            {% else %}
+            <p class="fw-semibold waiting-text">Waiting for host to start the meeting...</p>
+            {% endif %}
+            <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
+            {% endif %}
+
+            {% elif booking.status == 'rejected' %}
+            <span class="text-danger fw-bold">Booking Rejected</span>
+
+            {% elif booking.status == 'canceled' or booking.status == 'cancelled' %}
+            <span class="text-warning fw-bold">Booking Cancelled</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

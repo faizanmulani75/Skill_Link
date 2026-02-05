@@ -1,5 +1,9 @@
 from django.shortcuts import render
 from skills.models import Skill, ProfileSkill
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from .models import PlatformReview # Import the new model
 
 def index(request):
 
@@ -21,32 +25,38 @@ def index(request):
     from accounts.models import Profile
     top_tutors = Profile.objects.filter(rating__gt=0).order_by('-rating')[:4]
 
-    # Reviews from Database
-    from mettings.models import Review
-    latest_reviews = Review.objects.select_related('booking__requester__user').order_by('-created_at')[:6]
+    # Reviews logic:
+    # 1. Platform Reviews (New System)
+    platform_reviews = PlatformReview.objects.select_related('user__profile').order_by('-created_at')[:6]
+    
     reviews = []
-    for r in latest_reviews:
-        reviews.append({
-            "name": r.booking.requester.user.get_full_name() or r.booking.requester.user.username,
-            "text": r.comment,
-            "profile_pic": r.booking.requester.profile_pic.url if r.booking.requester.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
-            "role": f"Learned {r.booking.skill.name}"
-        })
-
-    # Fallback to static if no reviews yet
-    # if not reviews:
-    #     reviews = [
-    #         {"name": "yash", "text": "SkillLink helped me learn Python fast!",
-    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
-    #         {"name": "Faizan", "text": "Amazing platform for peer-to-peer skill sharing.",
-    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
-    #     ]
+    
+    # If we have platform reviews, prioritize them
+    if platform_reviews.exists():
+        for r in platform_reviews:
+            reviews.append({
+                "name": r.user.get_full_name() or r.user.username,
+                "text": r.content,
+                "profile_pic": r.user.profile.profile_pic.url if hasattr(r.user, 'profile') and r.user.profile.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
+                "role": "SkillLink User (Platform Review)"
+            })
+    else:
+        # Fallback to Meeting Reviews (Old System)
+        from mettings.models import Review
+        latest_reviews = Review.objects.select_related('booking__requester__user').order_by('-created_at')[:6]
+        for r in latest_reviews:
+            reviews.append({
+                "name": r.booking.requester.user.get_full_name() or r.booking.requester.user.username,
+                "text": r.comment,
+                "profile_pic": r.booking.requester.profile_pic.url if r.booking.requester.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
+                "role": f"Learned {r.booking.skill.name}"
+            })
 
     # Team Section
     team = [
         {
             "name": "Faizan Mulani",
-            "role": "Project Manager",
+            "role": "Founder",
             "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
             "social": {
                 "instagram": "https://instagram.com/faizan.m_75",
@@ -54,7 +64,7 @@ def index(request):
         },
         {
             "name": "Yash Madane",
-            "role": "Backend Developer",
+            "role": "Co-Founder",
             "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
             "social": {
                 "instagram": "https://instagram.com/yash20_06",
@@ -64,7 +74,7 @@ def index(request):
         },
         {
             "name": "Mustkim Maniyar",
-            "role": "Frontend Developer",
+            "role": "Co-Founder",
             "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
             "social": {
                 "instagram": "https://instagram.com/_mustkim_maniyar_585",
@@ -96,3 +106,31 @@ def index(request):
     }
 
     return render(request, 'index.html', context)
+
+
+@login_required
+@require_POST
+def submit_platform_review(request):
+    import json
+    try:
+        data = json.loads(request.body)
+        content = data.get('content')
+        rating = int(data.get('rating', 5))
+
+        if not content:
+            return JsonResponse({'success': False, 'message': 'Review content is required.'})
+
+        PlatformReview.objects.create(
+            user=request.user,
+            content=content,
+            rating=rating
+        )
+
+        # Update profile
+        profile = request.user.profile
+        profile.has_reviewed_platform = True
+        profile.save()
+
+        return JsonResponse({'success': True, 'message': 'Review submitted successfully!'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})

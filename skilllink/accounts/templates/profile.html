@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block title %}{{ profile.user.username }}'s Profile - SkillLink{%endblock %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% block title %}{{ profile.user.username }}'s Profile - SkillLink{%endblock%} {% block content %}
 <div class="container my-5">
   <div class="profile-card shadow-lg p-4 mx-auto">
     <div class="row g-4 align-items-center">
@@ -21,7 +21,7 @@
         <h2 class="fw-bold mb-1 user-name">
           {{ profile.user.username }}
         </h2>
-        <p class="user-role mb-2">SkillLink User</p>
+        <p class="user-role mb-2">{{ review.role|default:"SkillLink User" }}</p>
         <p class="user-email mb-2">{{ user.email }}</p>
 
         {% if user.profile.location %}
@@ -41,107 +41,84 @@
 </div>
 
 <style>
-  /* Base font inherits from base.html (no reimport needed) */
+
   :root {
     --card-bg: #ffffff;
     --text-color: #212529;
     --heading-color: #111;
     --secondary-text: #555;
-    --muted-text: #777;
-    --border-color: rgba(255, 215, 0, 0.3);
-    --theme-color: #ffd700;
+    --muted-text: #64748b;
+    --border-color: rgba(0, 0, 0, 0.05);
+    --theme-color: #f59e0b;
   }
 
-  body.dark-mode {
-    --card-bg: #1f1f1f;
-    --text-color: #f1f1f1;
-    --heading-color: #fff;
-    --secondary-text: #ccc;
-    --muted-text: #bbb;
-    --border-color: rgba(255, 215, 0, 0.2);
-  }
 
-  /* 🌈 Profile Card */
   .profile-card {
     max-width: 850px;
-    border-radius: 25px;
+    border-radius: 1.5rem;
     background: var(--card-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
-    transition: all 0.4s ease;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(18px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
 
   .profile-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   }
 
-  /* 👤 Profile Picture */
+
   .profile-pic {
     width: 130px;
     height: 130px;
     object-fit: cover;
     transition: all 0.3s ease;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .profile-pic:hover {
-    transform: scale(1.08);
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
   }
 
-  /* ✏️ Elegant Edit Button */
+
   .edit-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
     outline: none;
     border-radius: 50px;
-    background: linear-gradient(135deg, var(--theme-color), #ffcf40);
-    color: #000;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
     letter-spacing: 0.5px;
     transition: all 0.3s ease-in-out;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.35);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
   }
 
   .edit-btn:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
-    background: linear-gradient(135deg, #ffdf40, var(--theme-color));
-    color: #111;
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #fbbf24, #b45309);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
   }
 
   .edit-btn:active {
     transform: scale(0.98);
-    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.4);
-  }
-
-  /* 🌙 Dark Mode Glow */
-  body.dark-mode .edit-btn {
-    background: linear-gradient(135deg, #ffc107, #ffb300);
-    color: #111;
-    box-shadow: 0 3px 12px rgba(255, 193, 7, 0.4);
-  }
-
-  body.dark-mode .edit-btn:hover {
-    background: linear-gradient(135deg, #ffda3b, #ffb300);
-    box-shadow: 0 5px 25px rgba(255, 193, 7, 0.6);
   }
 
 
-  /* 🪶 Text Styling */
   .user-name {
-    font-size: 1.8rem;
+    font-size: 2rem;
+    font-weight: 800;
     color: var(--heading-color);
   }
 
   .user-role {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--muted-text);
-    letter-spacing: 0.5px;
   }
 
   .user-email,
@@ -153,19 +130,48 @@
   .user-bio {
     font-style: italic;
     line-height: 1.6;
+    font-size: 1.1rem;
   }
 
-  /* 🌙 Dark Mode Adjustments */
+  .text-theme {
+    color: var(--theme-color) !important;
+  }
+
+
+  body.dark-mode {
+    background-color: #000000 !important;
+    color: #f1f5f9;
+  }
+
   body.dark-mode .profile-card {
-    background: rgba(25, 25, 25, 0.7);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+    background: #1A1A1A;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
   }
 
-  body.dark-mode .profile-pic:hover {
-    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+  body.dark-mode .user-name {
+    color: #f1f5f9;
   }
 
-  /* 📱 Responsive Design */
+  body.dark-mode .user-role,
+  body.dark-mode .user-email,
+  body.dark-mode .user-location,
+  body.dark-mode .user-bio,
+  body.dark-mode p {
+    color: #a3a3a3;
+  }
+
+  body.dark-mode .profile-pic {
+    border-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  body.dark-mode .edit-btn {
+    color: #fff;
+  }
+
+
   @media (max-width: 768px) {
     .profile-card {
       text-align: center;

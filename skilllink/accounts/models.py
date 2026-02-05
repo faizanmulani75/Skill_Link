@@ -58,6 +58,9 @@ class Profile(models.Model):
     level = models.IntegerField(default=1)
     verified = models.BooleanField(default=True)
     desired_skills = models.ManyToManyField('skills.Skill', related_name='wanted_by_profiles', blank=True)
+    has_reviewed_platform = models.BooleanField(default=False)
+    show_level_up_modal = models.BooleanField(default=False)
+    blocked_until = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return self.user.username
@@ -132,10 +135,12 @@ class Profile(models.Model):
         
         if new_level != old_level:
             self.level = new_level
+            self.save()  # Save new level and XP
             # Handle Level Up side effects (Notifications, Rewards)
             self.on_level_up(old_level, new_level)
             return True  # Level up occurred
         
+        self.save() # Save XP change even if no level up
         return False  # No level up
 
     def on_level_up(self, old_level, new_level):
@@ -150,8 +155,12 @@ class Profile(models.Model):
             link="/accounts/dashboard/"
         )
 
-        # 2. Milestone Reward (Every 5 Levels)
-        if new_level % 5 == 0:
+        # Trigger Modal
+        self.show_level_up_modal = True
+        self.save(update_fields=['show_level_up_modal'])
+
+        # 2. Milestone Reward (Every 5 Levels up to 50)
+        if new_level % 5 == 0 and new_level <= 50:
             reward_tokens = 50
             self.add_tokens(
                 amount=reward_tokens,

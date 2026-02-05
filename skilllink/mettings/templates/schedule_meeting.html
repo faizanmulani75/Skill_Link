@@ -11,7 +11,7 @@
     <h2 class="card-title text-center fw-bold mb-4 animate__animated animate__fadeInDown">{{ booking.skill.name }} Meeting</h2>
     
     <p class="text-dark mb-2"><strong>Skill:</strong> {{ booking.skill.name }}</p>
-    <p class="text-dark mb-4"><strong>Requester:</strong> {{ booking.requester.user.first_name }} {{ booking.requester.user.last_name }}</p>
+    <p class="text-dark mb-4"><strong>Requester:</strong> {{ booking.requester.user.get_full_name|default:booking.requester.user.username }}</p>
 
     <form method="POST">
         {% csrf_token %}

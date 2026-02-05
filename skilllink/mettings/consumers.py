@@ -174,8 +174,10 @@ class UserConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'status_update',
             'booking_id': event['booking_id'],
-            'status': event['status'],
+            'new_status': event['new_status'], # Note: JS expects new_status based on booking_list.html:179
             'message': event['message'],
+            'action_urls': event.get('action_urls', {}),
+            'is_provider': event.get('is_provider', False),
             'unread_count': unread_count
         }))
 
@@ -183,4 +185,26 @@ class UserConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'token_update',
             'balance': event['balance']
+        }))
+
+    async def new_booking_request(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'new_booking_request',
+            'booking_id': event['booking_id'],
+            'role': event.get('role', 'provider')
+        }))
+
+    async def new_swap_request(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'new_swap_request',
+            'swap_id': event['swap_id']
+        }))
+        
+    async def force_logout(self, event):
+        """
+        Handle force logout event triggered by backend (e.g., getting blocked).
+        """
+        await self.send(text_data=json.dumps({
+            'type': 'force_logout',
+            'message': event['message']
         }))

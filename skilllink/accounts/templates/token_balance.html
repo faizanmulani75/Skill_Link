@@ -72,7 +72,6 @@
 </div>
 
 <style>
-  /* Smooth transitions */
   body,
   .card,
   .btn,
@@ -81,129 +80,147 @@
     transition: all 0.4s ease-in-out;
   }
 
-  /* Card Styles */
+
   .token-card {
-    background: linear-gradient(145deg, #fff8dc, #fffef5);
-    border: 2px solid #f1c40f;
-    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
 
   .token-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   }
 
-  /* Button */
+
+  .token-card input {
+    border-radius: 0.5rem !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.75rem !important;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    color: #1e293b;
+  }
+
+  .token-card input:focus {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1) !important;
+    outline: none;
+  }
+
+
   .btn-theme {
-    background: #f1c40f;
-    color: #222;
-    border-radius: 12px;
-    padding: 10px 0;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    border: none;
+    border-radius: 50rem;
+    padding: 0.75rem 1.5rem;
     transition: all 0.3s ease;
   }
 
   .btn-theme:hover {
-    background: #d4ac0d;
-    color: black;
+    background: linear-gradient(135deg, #fbbf24, #b45309);
+    color: #000;
     transform: scale(1.05);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
   }
 
-  /* Token Balance Animation */
+
   .token-balance {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #28a745;
+    color: #f59e0b;
     animation: pulse 2s infinite;
   }
 
   @keyframes pulse {
     0% {
-      text-shadow: 0 0 5px #28a745;
+      text-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
     }
 
     50% {
-      text-shadow: 0 0 15px #28a745;
+      text-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
     }
 
     100% {
-      text-shadow: 0 0 5px #28a745;
+      text-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
     }
   }
 
-  /* Table Hover */
+
   .table-hover tbody tr:hover {
-    background-color: #fff8cc !important;
-    transition: 0.3s ease;
+    background-color: #fef3c7;
   }
 
-  /* --- DARK MODE --- */
+  .table thead th {
+    background-color: #fef3c7;
+    color: #b45309;
+    border: none;
+  }
+
+
   body.dark-mode {
-    background: #121212 !important;
-    color: #f5f5f5 !important;
+    background: #000000 !important;
+    color: #f1f5f9 !important;
   }
 
   body.dark-mode .token-card {
-    background: linear-gradient(145deg, #1e1e1e, #2a2a2a) !important;
-    border: 1px solid #555;
+    background: #1A1A1A !important;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
   }
 
   body.dark-mode h2,
   body.dark-mode h3,
-  body.dark-mode label,
-  body.dark-mode p {
-    color: #eee !important;
+  body.dark-mode label {
+    color: #f1f5f9 !important;
   }
 
-  body.dark-mode .btn-theme {
-    background: #f39c12 !important;
-    color: #000000 !important;
+  body.dark-mode p.text-muted {
+    color: #a3a3a3 !important;
   }
 
-  body.dark-mode .table-warning {
-    background-color: #3a3a3a !important;
-    color: #f1c40f !important;
-  }
 
-  body.dark-mode .table-hover tbody tr:hover {
-    background-color: #2f2f2f !important;
-  }
-
-  body.dark-mode input {
-    background: #2a2a2a !important;
+  body.dark-mode .token-card input {
+    background: #222 !important;
     border: 1px solid #444 !important;
-    color: #fff !important;
+    color: #f1f5f9 !important;
+  }
+
+  body.dark-mode .token-card input:focus {
+    border-color: #f59e0b !important;
+    background-color: #2a2a2a !important;
   }
 
   body.dark-mode input::placeholder {
-    color: #bbb !important;
+    color: #a3a3a3 !important;
   }
 
-  /* Dark Mode Table Styles */
+
   body.dark-mode .table {
-    color: #e0e0e0 !important;
-    border-color: #444 !important;
+    color: #e2e8f0 !important;
+    border-color: #333 !important;
   }
 
   body.dark-mode .table thead th {
-    background-color: #2c2918 !important;
-    color: #f1c40f !important;
-    border-bottom: 2px solid #555 !important;
+    background-color: #333 !important;
+    color: #f59e0b !important;
+    border-bottom: 1px solid #444 !important;
   }
 
   body.dark-mode .table tbody td {
     background-color: transparent !important;
-    border-color: #444 !important;
-    color: #e0e0e0 !important;
+    border-color: #333 !important;
+    color: #e2e8f0 !important;
   }
 
   body.dark-mode .table-hover tbody tr:hover td {
-    background-color: #2f2f2f !important;
-    /* color: #fff !important; */
+    background-color: #222 !important;
   }
 
   body.dark-mode .text-muted {
-    color: #a0a0a0 !important;
+    color: #a3a3a3 !important;
   }
 
   body.dark-mode .table tbody td.text-success,
@@ -217,13 +234,7 @@
   }
 </style>
 
-<!-- Animate.css -->
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-<!-- Dark Mode Sync -->
-<script>
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-  }
-</script>
 {% endblock %}

@@ -80,45 +80,16 @@ def booking_list(request):
     profile = request.user.profile
     now = timezone.now()
 
-    # Proactive completion check for meetings that are overdue
-    # Proactive completion check: Zoom status OR Overdue
-    
-    # 1. Check active scheduled meetings (started)
-    active_bookings = Booking.objects.filter(
-        status='scheduled', 
-        tokens_released=False,
-        meeting_started=True
-    )
+    # Note: Meeting completion is handled by the 'update_meetings' management command (Cron Job)
+    # This prevents page load timeouts due to slow Zoom API calls.
 
-    for booking in active_bookings:
-        should_complete = False
-        
-        # Check Zoom Status
-        if booking.zoom_meeting_id:
-            status = get_zoom_meeting_status(booking.zoom_meeting_id)
-            if status == "finished":
-                should_complete = True
-        
-        # Time-based fallback (2 hours after start)
-        if not should_complete and booking.meeting_started_at:
-             if now > booking.meeting_started_at + timezone.timedelta(hours=2):
-                 should_complete = True
-        
-        if should_complete:
-            finalize_booking(booking)
+    bookings_received = Booking.objects.filter(provider=profile).select_related(
+        'skill', 'requester__user', 'provider__user'
+    ).prefetch_related('history').order_by('-requested_at')
 
-    # 2. Check strict overdue (fallback for when meeting_started was not set)
-    overdue_bookings = Booking.objects.filter(
-        status='scheduled', 
-        tokens_released=False,
-        proposed_time__lte=now - timezone.timedelta(hours=2)
-    ).exclude(id__in=[b.id for b in active_bookings])
-    
-    for booking in overdue_bookings:
-        finalize_booking(booking)
-
-    bookings_received = Booking.objects.filter(provider=profile).order_by('-requested_at')
-    bookings_made = Booking.objects.filter(requester=profile).order_by('-requested_at')
+    bookings_made = Booking.objects.filter(requester=profile).select_related(
+        'skill', 'requester__user', 'provider__user'
+    ).prefetch_related('history').order_by('-requested_at')
     return render(request, "booking_list.html", {
         "bookings_received": bookings_received,
         "bookings_made": bookings_made
@@ -218,7 +189,18 @@ def start_meeting(request, booking_id):
         messages.error(request, "You are not allowed to join this meeting.")
         return redirect('booking_list')
 
-    # Create Zoom meeting if not exists
+    # Track who joined
+    if request.user.profile == booking.provider:
+        booking.provider_joined = True
+    elif request.user.profile == booking.requester:
+        booking.requester_joined = True
+    
+    # If both have joined, mark actual start time
+    if booking.provider_joined and booking.requester_joined and not booking.actual_start_time:
+        booking.actual_start_time = timezone.now()
+        booking.meeting_started = True # Ensure this is true
+
+    # Create Zoom meeting if not exists (Provider only mostly, but safety check)
     if not booking.meeting_link:
         try:
             zoom_response = create_zoom_meeting(
@@ -229,17 +211,12 @@ def start_meeting(request, booking_id):
             booking.zoom_meeting_id = zoom_response.get("id")
             booking.meeting_started = True
             booking.meeting_started_at = timezone.now()
-            booking.save()
-            messages.success(request, "Zoom meeting created. You can join now.")
+            messages.success(request, "Zoom meeting created. Redirecting...")
         except Exception as e:
             messages.error(request, f"Zoom error: {e}")
             return redirect('booking_list')
 
-    # Mark meeting as started
-    if not booking.meeting_started:
-        booking.meeting_started = True
-        booking.meeting_started_at = timezone.now()
-        booking.save()
+    booking.save() # Save all flags
 
     return redirect(booking.meeting_link)
 
@@ -364,6 +341,10 @@ def submit_report(request, booking_id):
                 booking=booking,
                 reason=reason
             )
+            # Disable review if report is submitted
+            booking.review_pending = False
+            booking.save(update_fields=['review_pending'])
+            
             messages.success(request, "Report submitted successfully. We will look into it.")
         else:
             messages.error(request, "Reason is required for reporting.")
@@ -397,7 +378,7 @@ def booking_details(request, booking_id):
         'chat_messages': chat_messages,
     })
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 
 @login_required
 def send_message(request, booking_id):
@@ -594,3 +575,11 @@ def respond_to_swap(request, swap_id, action):
         messages.info(request, "Swap request rejected.")
         
     return redirect('manage_swap_requests')
+
+
+@login_required
+def render_booking_card(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if request.user.profile not in [booking.requester, booking.provider]:
+        return HttpResponseForbidden()
+    return render(request, "includes/booking_card.html", {"booking": booking})

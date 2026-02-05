@@ -8,86 +8,23 @@
 
   {# --- Incoming Bookings (Provider) --- #}
   <h2 class="fw-semibold mb-3 animate__animated animate__fadeInLeft headings-color">Incoming Booking Requests</h2>
-  {% for booking in bookings_received %}
-  <div class="card shadow mb-4 animate__animated animate__fadeInUp booking-card" id="booking-card-{{ booking.id }}">
-    <div class="card-body">
-      <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
-      <p><strong>Status:</strong> <span class="badge bg-info text-dark status-badge">{{ booking.status|capfirst }}</span></p>
-      <p><strong>Requester:</strong> {{ booking.requester.user.get_full_name|default:booking.requester.user.username }}
-      </p>
-
-      <p><strong>Proposed Times:</strong></p>
-      <ul>
-        {% for h in booking.history.all %}
-        <li>{{ h.proposed_time|date:"D, d M Y h:i A" }}</li>
-        {% endfor %}
-      </ul>
-
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        {% if booking.status == 'pending' %}
-        <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-success fw-bold shadow-sm">Accept &
-          Schedule</a>
-        <a href="{% url 'booking_update_status' booking.id 'reject' %}"
-          class="btn btn-danger fw-bold shadow-sm">Reject</a>
-        {% elif booking.status == 'accepted' %}
-        <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-primary fw-bold shadow-sm">Schedule Meeting</a>
-        {% elif booking.status == 'scheduled' %}
-        {% if booking.provider.user == user %}
-        <a href="{% url 'start_meeting' booking.id %}" target="_blank" class="btn btn-primary fw-bold shadow-sm">Start
-          Zoom</a>
-        <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
-        {% elif booking.requester.user == user %}
-        {% if booking.meeting_started %}
-        <a href="{{ booking.meeting_link }}" target="_blank" class="btn btn-success fw-bold shadow-sm">Join Zoom</a>
-        {% else %}
-        <p class="fw-semibold waiting-text">Waiting for host to start the meeting...</p>
-        {% endif %}
-        {% endif %}
-        {% endif %}
-      </div>
-    </div>
+  <div id="incoming-bookings-list">
+    {% for booking in bookings_received %}
+    {% include 'includes/booking_card.html' with booking=booking %}
+    {% empty %}
+    <p class="mb-4 headings-color empty-msg">No incoming bookings.</p>
+    {% endfor %}
   </div>
-  {% empty %}
-  <p class="mb-4 headings-color">No incoming bookings.</p>
-  {% endfor %}
 
   {# --- My Bookings (Requester) --- #}
   <h2 class="fw-semibold mb-3 mt-5 animate__animated animate__fadeInLeft headings-color">My Bookings (Requested)</h2>
-  {% for booking in bookings_made %}
-  <div class="card shadow mb-4 animate__animated animate__fadeInUp booking-card" id="booking-card-{{ booking.id }}">
-    <div class="card-body">
-      <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
-      <p><strong>Status:</strong> <span class="badge bg-info text-dark status-badge">{{ booking.status|capfirst }}</span></p>
-      <p><strong>Provider:</strong> {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</p>
-
-      <p><strong>Proposed Times:</strong></p>
-      <ul>
-        {% for h in booking.history.all %}
-        <li>{{ h.proposed_time|date:"D, d M Y h:i A" }}</li>
-        {% endfor %}
-      </ul>
-
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        {% if booking.status == 'pending' %}
-        <a href="{% url 'booking_update_status' booking.id 'cancel' %}"
-          class="btn btn-warning fw-bold shadow-sm">Cancel</a>
-        {% elif booking.status == 'scheduled' %}
-        {% if booking.requester.user == user %}
-        {% if booking.meeting_started %}
-        <a href="{{ booking.meeting_link }}" target="_blank" class="btn btn-success fw-bold shadow-sm">Join Zoom</a>
-        <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
-        {% else %}
-        <p class="fw-semibold waiting-text">Waiting for host to start the meeting...</p>
-        <a href="{% url 'booking_details' booking.id %}" class="btn btn-info fw-bold shadow-sm">Chat</a>
-        {% endif %}
-        {% endif %}
-        {% endif %}
-      </div>
-    </div>
+  <div id="my-bookings-list">
+    {% for booking in bookings_made %}
+    {% include 'includes/booking_card.html' with booking=booking %}
+    {% empty %}
+    <p class="headings-color empty-msg">No bookings made yet.</p>
+    {% endfor %}
   </div>
-  {% empty %}
-  <p class="headings-color">No bookings made yet.</p>
-  {% endfor %}
 
 </div>
 
@@ -198,27 +135,131 @@
     }
   });
 
+
+  window.addEventListener('newBookingRequest', function (e) {
+    const data = e.detail;
+
+
+    let listId = 'incoming-bookings-list';
+    if (data.role === 'requester') {
+      listId = 'my-bookings-list';
+    }
+
+    const list = document.getElementById(listId);
+
+
+    fetch(`/meetings/render_card/${data.booking_id}/`)
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.text();
+      })
+      .then(html => {
+        if (list) {
+
+          const emptyMsg = list.querySelector('.empty-msg');
+          if (emptyMsg) emptyMsg.remove();
+
+          const div = document.createElement('div');
+          div.innerHTML = html;
+          const newCard = div.firstElementChild;
+
+
+          newCard.classList.add('animate__animated', 'animate__fadeInDown');
+          list.prepend(newCard);
+        }
+      })
+      .catch(err => console.error("Error fetching new booking card:", err));
+  });
+
+
   window.addEventListener('bookingStatusChanged', function (e) {
     const data = e.detail;
-    const card = document.getElementById(`booking-card-${data.booking_id}`);
-    if (card) {
-      const badge = card.querySelector('.status-badge');
-      if (badge) {
-        badge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+    console.log("Booking Update Received:", data);
+
+    if (data.booking_id) {
+      const card = document.getElementById(`booking-card-${data.booking_id}`);
+      if (card) {
+
+        const badge = card.querySelector('.status-badge');
+        if (badge) {
+          badge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
+
+          badge.className = 'badge text-dark status-badge';
+          if (data.new_status === 'accepted') badge.classList.add('bg-success');
+          else if (data.new_status === 'rejected' || data.new_status === 'cancelled') badge.classList.add('bg-danger');
+          else if (data.new_status === 'pending') badge.classList.add('bg-info');
+          else badge.classList.add('bg-secondary');
+        }
+
+
+        card.classList.add('animate__animated', 'animate__pulse');
+        card.style.borderColor = "#f9b934";
+
+        setTimeout(() => {
+          card.classList.remove('animate__animated', 'animate__pulse');
+          card.style.borderColor = "";
+        }, 2000);
+
+
+        if (data.action_urls) {
+          const btnContainer = card.querySelector('.d-flex.flex-wrap.gap-2.mt-2');
+          if (btnContainer) {
+            btnContainer.innerHTML = '';
+
+
+            if (data.new_status === 'accepted' && data.action_urls.schedule_url) {
+              btnContainer.innerHTML = `<a href="${data.action_urls.schedule_url}" class="btn btn-success fw-bold shadow-sm animate__animated animate__zoomIn">Accept & Schedule</a>`;
+            }
+
+            else if (data.new_status === 'scheduled') {
+              let html = '';
+              if (data.is_provider && data.action_urls.start_meeting_url) {
+                html += `<a href="${data.action_urls.start_meeting_url}" target="_blank" class="btn btn-primary fw-bold shadow-sm animate__animated animate__zoomIn me-2">Start Zoom</a>`;
+              } else if (!data.is_provider && data.action_urls.join_meeting_url) {
+                html += `<a href="${data.action_urls.join_meeting_url}" target="_blank" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn me-2">Join Zoom</a>`;
+              } else if (!data.is_provider) {
+                html += `<span class="badge bg-secondary me-2 animate__animated animate__fadeIn">Scheduled</span>`;
+              }
+
+              if (data.action_urls.chat_url) {
+                html += `<a href="${data.action_urls.chat_url}" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn">Chat</a>`;
+              }
+              btnContainer.innerHTML = html;
+            }
+
+            else if (data.new_status === 'rejected') {
+              btnContainer.innerHTML = `<span class="text-danger fw-bold animate__animated animate__fadeIn">Booking Rejected</span>`;
+            }
+
+            else if (data.new_status === 'cancelled') {
+              btnContainer.innerHTML = `<span class="text-warning fw-bold animate__animated animate__fadeIn">Booking Cancelled</span>`;
+            }
+          }
+        } else {
+
+          if (data.new_status === 'accepted') {
+            const body = card.querySelector('.card-body');
+            if (!body.querySelector('.refresh-hint')) {
+              const hint = document.createElement('div');
+              hint.className = "alert alert-warning mt-2 refresh-hint animate__animated animate__fadeIn";
+              hint.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Status changed. <a href="javascript:location.reload()" class="fw-bold">Refresh</a> to proceed.';
+              body.appendChild(hint);
+            }
+          }
+        }
       }
-      card.classList.add('animate__animated', 'animate__pulse');
     }
   });
 </script>
 
 <style>
-  /* Base Card Style (Light Mode) */
+
   .booking-card {
     border: 2px solid #F0E68C;
     background-color: #FFF8DC;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     color: #212529;
-    /* Default bootstrap dark text */
+
   }
 
   .booking-card:hover {
@@ -234,7 +275,7 @@
     color: #212529;
   }
 
-  /* Dark Mode Overrides */
+
   body.dark-mode .headings-color {
     color: #f5f5f5 !important;
   }
@@ -253,8 +294,6 @@
     color: #ccc;
   }
 
-  /* Ensure status badges remain readable */
-  /* .badge.bg-info.text-dark is explicitly black text on light blue bg, keeping it is usually fine */
 
 
   .btn {
@@ -282,7 +321,7 @@
     --animate-duration: 0.8s;
   }
 
-  /* Star Rating Styles */
+
   .star-rating {
     display: flex;
     flex-direction: row-reverse;
@@ -306,7 +345,7 @@
     color: #ffc107;
   }
 
-  /* Modal Dark Mode Overrides */
+
   body.dark-mode .modal-content {
     background-color: #1a1a1a;
     border: 1px solid #444;
@@ -343,7 +382,6 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // 🟢 Listen for real-time booking status changes (dispatched from base.html)
     window.addEventListener('bookingStatusChanged', function (e) {
       const data = e.detail;
       console.log("Booking Update Received:", data);
@@ -351,45 +389,54 @@
       if (data.booking_id) {
         const card = document.getElementById(`booking-card-${data.booking_id}`);
         if (card) {
-          // 1. Update Badge
+
           const badge = card.querySelector('.status-badge');
           if (badge) {
             badge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
 
-            // Re-apply classes
-            badge.className = 'badge text-dark status-badge'; // reset
+
+            badge.className = 'badge text-dark status-badge';
             if (data.new_status === 'accepted') badge.classList.add('bg-success');
-            else if (data.new_status === 'rejected' || data.new_status === 'cancelled') badge.classList.add('bg-danger');
-            else if (data.new_status === 'pending') badge.classList.add('bg-info');
+            else if (data.new_status === 'rejected' || data.new_status === 'cancelled' || data.new_status === 'canceled') badge.classList.add('bg-danger');
+            else if (data.new_status === 'pending') badge.classList.add('bg-warning');
+            else if (data.new_status === 'scheduled') badge.classList.add('bg-primary');
             else badge.classList.add('bg-secondary');
           }
 
-          // 2. Highlight effect to draw attention
+
           card.classList.add('animate__animated', 'animate__pulse');
-          card.style.borderColor = "#f9b934"; // Flash border
+          card.style.borderColor = "#f9b934";
 
           setTimeout(() => {
             card.classList.remove('animate__animated', 'animate__pulse');
             card.style.borderColor = "";
           }, 2000);
 
-          // 3. Dynamic Button Swapping
+
           if (data.action_urls) {
             const btnContainer = card.querySelector('.d-flex.flex-wrap.gap-2.mt-2');
             if (btnContainer) {
-              btnContainer.innerHTML = ''; // Clean slate
+              btnContainer.innerHTML = '';
 
-              // Accepted -> Schedule
-              if (data.new_status === 'accepted' && data.action_urls.schedule_url) {
-                btnContainer.innerHTML = `<a href="${data.action_urls.schedule_url}" class="btn btn-success fw-bold shadow-sm animate__animated animate__zoomIn">Accept & Schedule</a>`;
+
+              if (data.new_status === 'accepted') {
+                let html = '';
+
+                if (data.is_provider && data.action_urls.schedule_url) {
+                  html += `<a href="${data.action_urls.schedule_url}" class="btn btn-primary fw-bold shadow-sm animate__animated animate__zoomIn me-2">Schedule Meeting</a>`;
+                }
+                if (data.action_urls.chat_url) {
+                  html += `<a href="${data.action_urls.chat_url}" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn">Chat</a>`;
+                }
+                btnContainer.innerHTML = html;
               }
-              // Scheduled -> Start/Chat
+
               else if (data.new_status === 'scheduled') {
                 let html = '';
                 if (data.is_provider && data.action_urls.start_meeting_url) {
                   html += `<a href="${data.action_urls.start_meeting_url}" target="_blank" class="btn btn-primary fw-bold shadow-sm animate__animated animate__zoomIn me-2">Start Zoom</a>`;
                 } else if (!data.is_provider && data.action_urls.join_meeting_url) {
-                  html += `<a href="${data.action_urls.join_meeting_url}" target="_blank" class="btn btn-info fw-bold shadow-sm animate__animated animate__zoomIn me-2">Join Zoom</a>`;
+                  html += `<a href="${data.action_urls.join_meeting_url}" target="_blank" class="btn btn-primary fw-bold shadow-sm animate__animated animate__zoomIn me-2">Join Zoom</a>`;
                 } else if (!data.is_provider) {
                   html += `<span class="badge bg-secondary me-2 animate__animated animate__fadeIn">Scheduled</span>`;
                 }
@@ -399,13 +446,13 @@
                 }
                 btnContainer.innerHTML = html;
               }
-              // Rejected
+
               else if (data.new_status === 'rejected') {
                 btnContainer.innerHTML = `<span class="text-danger fw-bold animate__animated animate__fadeIn">Booking Rejected</span>`;
               }
             }
           } else {
-            // Fallback if no URLs sent (backwards compat)
+
             if (data.new_status === 'accepted') {
               const body = card.querySelector('.card-body');
               if (!body.querySelector('.refresh-hint')) {

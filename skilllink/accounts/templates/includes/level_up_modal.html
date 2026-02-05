@@ -1,0 +1,83 @@
+<!-- Level Up Modal -->
+{% if profile.show_level_up_modal %}
+<div class="modal fade" id="levelUpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="levelUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg text-center p-4"
+            style="border-radius: 20px; background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%); color: white;">
+
+            <div class="modal-body position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0"
+                    data-bs-dismiss="modal" aria-label="Close" onclick="acknowledgeLevelUp()"></button>
+
+                <div class="mb-3">
+                    <i class="bi bi-trophy-fill"
+                        style="font-size: 5rem; color: #fff; text-shadow: 0 4px 6px rgba(0,0,0,0.2);"></i>
+                </div>
+
+                <h2 class="fw-bold mb-2 display-6">Level Up!</h2>
+                <h4 class="mb-4">You reached Level {{ profile.level }}! 🚀</h4>
+
+                {% if profile.level|divisibleby:5 and profile.level <= 50 %} <div
+                    class="bg-white text-dark rounded-3 p-3 mb-4 shadow-sm">
+                    <h5 class="fw-bold mb-1">🎁 Reward Unlocked!</h5>
+                    <p class="mb-0 fs-5 text-success fw-bold">+50 Tokens</p>
+            </div>
+            {% endif %}
+
+            <p class="fs-5">Keep learning and teaching to unlock more rewards!</p>
+
+            <button type="button" class="btn btn-light fw-bold rounded-pill px-5 py-2 mt-3 shadow"
+                data-bs-dismiss="modal" onclick="acknowledgeLevelUp()">Awesome!</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    body.dark-mode #levelUpModal .modal-content {
+        border: 1px solid #555;
+    }
+
+    body.dark-mode #levelUpModal .bg-white {
+        background-color: #2b2b2b !important;
+        color: #f5f5f5 !important;
+        border: 1px solid #444;
+    }
+
+    body.dark-mode #levelUpModal .mb-0.text-success {
+        color: #4ade80 !important;
+    }
+
+
+    body.dark-mode #levelUpModal .btn-light {
+        background-color: #e5e5e5;
+        color: #000;
+        border: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var levelUpModal = new bootstrap.Modal(document.getElementById('levelUpModal'));
+        levelUpModal.show();
+    });
+
+    function acknowledgeLevelUp() {
+        fetch("{% url 'acknowledge_level_up' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Failed to acknowledge level up:', data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+{% endif %}

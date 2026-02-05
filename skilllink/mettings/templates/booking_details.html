@@ -79,7 +79,7 @@
                 margin-bottom: 0.6rem;
             }
 
-            /* ===== Status Badges ===== */
+            
             .status-badge {
                 padding: 5px 10px;
                 border-radius: 10px;
@@ -101,7 +101,7 @@
                 color: #ffffff;
             }
 
-            /* ===== Buttons ===== */
+            
             .btn-join,
             .btn-schedule {
                 background: linear-gradient(135deg, #facc15, #eab308);
@@ -154,7 +154,7 @@
                 color: #e5e7eb;
             }
 
-            /* Status badges (dark) */
+            
             body.dark-mode .status-badge.completed {
                 background: #22c55e;
                 color: #022c22;
@@ -170,7 +170,7 @@
                 color: #020617;
             }
 
-            /* Buttons (dark) */
+            
             body.dark-mode .btn-join,
             body.dark-mode .btn-schedule {
                 /* box-shadow:
@@ -249,7 +249,7 @@
                 box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
             }
 
-            /* Header */
+            
             .chat-header {
                 padding: 14px 18px;
                 background: linear-gradient(135deg, #facc15, #eab308);
@@ -260,7 +260,7 @@
                 gap: 10px;
             }
 
-            /* Body */
+            
             .chat-body {
                 height: 500px;
                 background: linear-gradient(180deg, #f8fafc, #eef2f7);
@@ -268,14 +268,14 @@
                 flex-direction: column;
             }
 
-            /* Messages area */
+            
             .chat-messages {
                 flex: 1;
                 overflow-y: auto;
                 padding: 18px 20px;
             }
 
-            /* Message rows */
+            
             .message-row {
                 display: flex;
                 margin-bottom: 14px;
@@ -298,14 +298,14 @@
                 animation: fadeInUp 0.25s ease;
             }
 
-            /* Sent (YOU) */
+            
             .message-row.sent .message-bubble {
                 background: linear-gradient(135deg, #2563eb, #1d4ed8);
                 color: #ffffff;
                 border-bottom-right-radius: 6px;
             }
 
-            /* Received */
+            
             .message-row.received .message-bubble {
                 background: #ffffff;
                 color: #111827;
@@ -313,7 +313,7 @@
                 border-bottom-left-radius: 6px;
             }
 
-            /* Username */
+            
             .message-user {
                 font-size: 0.72rem;
                 font-weight: 700;
@@ -321,13 +321,13 @@
                 margin-bottom: 4px;
             }
 
-            /* Message text */
+            
             .message-text {
                 font-size: 0.95rem;
                 line-height: 1.45;
             }
 
-            /* Time */
+            
             .message-time {
                 font-size: 0.65rem;
                 text-align: right;
@@ -375,49 +375,49 @@
                 box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85);
             }
 
-            /* Header */
+            
             body.dark-mode .chat-header {
                 background: linear-gradient(135deg, #020617, #1f2937);
                 color: #facc15;
                 border-bottom: 1px solid rgba(250, 204, 21, 0.25);
             }
 
-            /* Body */
+            
             body.dark-mode .chat-body {
                 background:
                     radial-gradient(circle at top, rgba(250, 204, 21, 0.06), transparent 60%),
                     #020617;
             }
 
-            /* Messages */
+            
             body.dark-mode .chat-messages {
                 background: transparent;
             }
 
-            /* Sent */
+            
             body.dark-mode .message-row.sent .message-bubble {
                 background: linear-gradient(135deg, #2563eb, #1e40af);
                 color: #f9fafb;
             }
 
-            /* Received */
+            
             body.dark-mode .message-row.received .message-bubble {
                 background: linear-gradient(145deg, #0f172a, #020617);
                 color: #e5e7eb;
                 border: 1px solid rgba(250, 204, 21, 0.25);
             }
 
-            /* Username */
+            
             body.dark-mode .message-user {
                 color: #facc15;
             }
 
-            /* Time */
+            
             body.dark-mode .message-time {
                 color: #9ca3af;
             }
 
-            /* Input */
+            
             body.dark-mode .chat-input {
                 background: #020617;
                 border-top: 1px solid rgba(250, 204, 21, 0.25);
@@ -433,7 +433,7 @@
                 color: #9ca3af;
             }
 
-            /* Button glow */
+            
             body.dark-mode .btn-send {
                 box-shadow:
                     0 0 0 1px rgba(250, 204, 21, 0.35),
@@ -464,7 +464,7 @@
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
 
-    // WebSocket connection for this specific booking chat
+
     const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const chatSocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/meet/${bookingId}/`);
 
@@ -491,7 +491,7 @@
     chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         if (data.type === 'history') {
-            chatMessages.innerHTML = ''; // Clear initial render and use history from WS
+            chatMessages.innerHTML = ''; 
             data.messages.forEach(msg => {
                 appendMessage(msg.sender, msg.content, msg.timestamp);
             });
@@ -525,7 +525,7 @@
         }
     };
 
-    // Initial scroll to bottom
+
     chatMessages.scrollTop = chatMessages.scrollHeight;
 </script>
 {% endblock %}

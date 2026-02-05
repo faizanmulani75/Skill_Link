@@ -87,7 +87,6 @@
 
 {% block extra_head %}
 <style>
-    /* 🎨 Unified Card Styles (Glassmorphism) */
     .swap-card {
         border-radius: 20px;
         background: rgba(255, 255, 255, 0.85);
@@ -106,7 +105,7 @@
         border-bottom: 2px solid rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* 🌙 Dark Mode Support */
+
     body.dark-mode .swap-card {
         background: rgba(25, 25, 25, 0.8);
         color: #eaeaea;
@@ -118,7 +117,7 @@
         border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* List Items in Dark Mode */
+
     body.dark-mode .list-group-item {
         background-color: transparent;
         border-color: rgba(255, 255, 255, 0.1);
@@ -129,7 +128,7 @@
         color: #aaa !important;
     }
 
-    /* Adjust headings in dark mode */
+
     body.dark-mode h4.text-primary {
         color: #667eea !important;
     }
@@ -138,15 +137,14 @@
         color: #a0aec0 !important;
     }
 
-    /* Scrollable Container */
+
     .swap-list-scroll {
         max-height: 600px;
         overflow-y: auto;
         padding-right: 5px;
-        /* Prevent scrollbar overlap */
     }
 
-    /* Custom Scrollbar for the list */
+
     .swap-list-scroll::-webkit-scrollbar {
         width: 6px;
     }

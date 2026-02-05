@@ -2,10 +2,10 @@ from django.urls import path
 from .views import (
     dashboard, profile_view, profile_edit, login_page, register_page, logout_view,
     token_balance, spend_tokens, payment_success,add_tokens_view,edit_skill,delete_skill,add_skill,
-    public_profile
+    public_profile, acknowledge_level_up
+
     # verify_otp,resend_otp
 )
-
 urlpatterns = [
     # Auth
     path('login/', login_page, name='login'),
@@ -21,9 +21,6 @@ urlpatterns = [
     path("delete-skill/<int:pk>/", delete_skill, name="delete_skill"),
     path("add-skill/", add_skill, name="add_skill"),
 
-
-
-
     # user profile
     path('profile/<str:username>/', public_profile, name='public_profile'),
 
@@ -35,7 +32,9 @@ urlpatterns = [
     path('tokens/spend/', spend_tokens, name='spend_tokens'),
     path('token-add/', add_tokens_view, name='add_tokens'),
 
-
     # Payment success callback
     path('token-payment/success/', payment_success, name='payment_success'),
+
+    # Level Up Acknowledgment
+    path('acknowledge-level-up/', acknowledge_level_up, name='acknowledge_level_up'),
 ]

@@ -46,12 +46,40 @@ def login_page(request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
+        
         if user:
+            # Login successful
             login(request, user)
-            # defensive: ensure profile exists immediately (avoids template errors)
-            from .models import Profile
+            # defensive: ensure profile exists
             Profile.objects.get_or_create(user=user)
             return redirect("dashboard")
+        
+        else:
+            # Check if it is a valid user but BLOCKED (inactive)
+            try:
+                user_obj = User.objects.get(username=username)
+                if user_obj.check_password(password):
+                    # Password is correct, checks why auth failed
+                    if not user_obj.is_active:
+                        # Check blocking status
+                        if hasattr(user_obj, 'profile') and user_obj.profile.blocked_until:
+                            if user_obj.profile.blocked_until > timezone.now():
+                                # Still blocked
+                                days_left = (user_obj.profile.blocked_until.date() - timezone.now().date()).days
+                                # Avoid "0 days" if it's less than 24h, show hours or just date
+                                expiry_str = user_obj.profile.blocked_until.strftime('%Y-%m-%d %H:%M')
+                                messages.error(request, f"You have been blocked due to multiple reports. Access will be restored on {expiry_str}.")
+                                return render(request, "login.html")
+                            else:
+                                # Block expired - Reactivate!
+                                user_obj.is_active = True
+                                user_obj.save()
+                                login(request, user_obj)
+                                messages.success(request, "Your block has expired. Welcome back!")
+                                return redirect("dashboard")
+            except User.DoesNotExist:
+                pass
+
         messages.error(request, "Invalid credentials")
     return render(request, "login.html")
 
@@ -64,9 +92,29 @@ def register_page(request):
         password1 = request.POST.get("password1")
         password2 = request.POST.get("password2")
 
-        # ✅ Validate passwords
-        if password1 != password2:
-            messages.error(request, "Passwords do not match")
+        # ✅ Validate input fields
+        if not username or not email or not password1:
+            messages.error(request, "All fields are required")
+            return redirect("register")
+
+        # Validate Username (Alphanumeric + underscores)
+        import re
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+             messages.error(request, "Username must contain only letters, numbers, and underscores")
+             return redirect("register")
+
+        # Validate Password Strength
+        if len(password1) < 8:
+            messages.error(request, "Password must be at least 8 characters long")
+            return redirect("register")
+
+        # Validate Email Format
+        from django.core.validators import validate_email
+        from django.core.exceptions import ValidationError
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, "Invalid email address")
             return redirect("register")
 
         # ✅ Check existing username & email
@@ -223,10 +271,26 @@ def add_skill(request):
         skill_icon = request.FILES.get("skill_icon")
 
         if skill_name:
+            # Validation: Token Cost
+            try:
+                token_cost = int(token_cost)
+                if token_cost < 0:
+                    messages.error(request, "Token cost cannot be negative.")
+                    return redirect("add_skill")
+            except ValueError:
+                messages.error(request, "Invalid token cost.")
+                return redirect("add_skill")
+
             skill_obj, _ = Skill.objects.get_or_create(name=skill_name)
             if skill_icon:
                 skill_obj.skill_icon = skill_icon
                 skill_obj.save()
+            
+            # Check for duplicates avoid error
+            if ProfileSkill.objects.filter(profile=profile, skill=skill_obj).exists():
+                 messages.error(request, f"You already have the skill '{skill_name}'.")
+                 return redirect("add_skill")
+
             ProfileSkill.objects.create(
                 profile=profile,
                 skill=skill_obj,
@@ -358,34 +422,51 @@ def dashboard(request):
 
     # Token Trends (Last 30 days)
     thirty_days_ago = timezone.now() - timedelta(days=30)
-    transactions = Transaction.objects.filter(user=profile, timestamp__gte=thirty_days_ago)
     
-    daily_stats = transactions.annotate(date=TruncDate('timestamp')).values('date', 'transaction_type').annotate(total=Sum('amount')).order_by('date')
+    # Earned: From Transactions (Teaching + maybe Purchases if desired, but code was only 'earned')
+    earned_transactions = Transaction.objects.filter(
+        user=profile, 
+        transaction_type='earned',
+        timestamp__gte=thirty_days_ago
+    ).annotate(date=TruncDate('timestamp')).values('date').annotate(total=Sum('amount')).order_by('date')
+
+    # Spent: From Completed Bookings (Strictly only completed meetings)
+    spent_bookings = Booking.objects.filter(
+        requester=profile,
+        status='completed',
+        updated_at__gte=thirty_days_ago
+    ).annotate(date=TruncDate('updated_at')).values('date').annotate(total=Sum('tokens_spent')).order_by('date')
     
-    dates = []
-    earned_data = []
-    spent_data = []
-    
-    # Process data for Chart.js
-    # (Simplified for Hackathon: just listing transactions might be easier, but let's try aggregation)
-    # A dictionary to hold date -> {earned: 0, spent: 0}
     stats_dict = {}
-    for stat in daily_stats:
+    
+    # Process Earned
+    for stat in earned_transactions:
         date_str = stat['date'].strftime("%Y-%m-%d")
         if date_str not in stats_dict:
             stats_dict[date_str] = {'earned': 0, 'spent': 0}
-        
-        if stat['transaction_type'] == 'earned':
-            stats_dict[date_str]['earned'] = stat['total']
-        elif stat['transaction_type'] == 'spent':
-            stats_dict[date_str]['spent'] = stat['total']
+        stats_dict[date_str]['earned'] = stat['total']
+
+    # Process Spent
+    for stat in spent_bookings:
+        date_str = stat['date'].strftime("%Y-%m-%d")
+        if date_str not in stats_dict:
+            stats_dict[date_str] = {'earned': 0, 'spent': 0}
+        stats_dict[date_str]['spent'] = stat['total']
 
     # Fill lists
+    dates = []
+    earned_data = []
+    spent_data = []
     sorted_dates = sorted(stats_dict.keys())
+    
     for d in sorted_dates:
         dates.append(d)
         earned_data.append(stats_dict[d]['earned'])
         spent_data.append(stats_dict[d]['spent'])
+
+    # Meeting Counts
+    total_hosted = provider_bookings.filter(status="completed").count()
+    total_attended = requester_bookings.filter(status="completed").count()
 
     context = {
         "profile": profile,
@@ -401,9 +482,10 @@ def dashboard(request):
         "analytics_dates": json.dumps(dates, cls=DjangoJSONEncoder),
         "analytics_earned": json.dumps(earned_data, cls=DjangoJSONEncoder),
         "analytics_spent": json.dumps(spent_data, cls=DjangoJSONEncoder),
-        "total_meetings_hosted": provider_bookings.filter(status="completed").count(),
-        "total_meetings_attended": requester_bookings.filter(status="completed").count(),
+        "total_meetings_hosted": total_hosted,
+        "total_meetings_attended": total_attended,
         "swaps_pending": SwapRequest.objects.filter(target=profile, status='pending').count(),
+        "show_platform_review_modal": (not profile.has_reviewed_platform) and ((total_hosted + total_attended) >= 3),
     }
     return render(request, "dashboard.html", context)
 
@@ -453,3 +535,15 @@ def public_profile(request, username):
         "analytics_earned": json.dumps(earned_data, cls=DjangoJSONEncoder),
     }
     return render(request, "public_profile.html", context)
+
+
+@login_required
+@require_POST
+def acknowledge_level_up(request):
+    try:
+        profile = request.user.profile
+        profile.show_level_up_modal = False
+        profile.save(update_fields=['show_level_up_modal'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

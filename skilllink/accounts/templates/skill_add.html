@@ -16,7 +16,8 @@
       <!-- Skill Name -->
       <div class="mb-3">
         <label for="skill_name" class="form-label fw-semibold">Skill Name</label>
-        <input type="text" class="form-control form-control-theme" id="skill_name" name="skill_name" placeholder="e.g., Web Development, Guitar" required>
+        <input type="text" class="form-control form-control-theme" id="skill_name" name="skill_name"
+          placeholder="e.g., Web Development, Guitar" required>
       </div>
 
       <!-- Skill Icon -->
@@ -50,13 +51,15 @@
       <!-- Token Cost -->
       <div class="mb-3">
         <label for="token_cost" class="form-label fw-semibold">Token Cost</label>
-        <input type="number" class="form-control form-control-theme" id="token_cost" name="token_cost" min="0" value="0">
+        <input type="number" class="form-control form-control-theme" id="token_cost" name="token_cost" min="0"
+          value="0">
       </div>
 
       <!-- Personal Description -->
       <div class="mb-3">
         <label for="personal_description" class="form-label fw-semibold">Personal Description</label>
-        <textarea class="form-control form-control-theme" id="personal_description" name="personal_description" rows="3" placeholder="Describe your skill and experience..."></textarea>
+        <textarea class="form-control form-control-theme" id="personal_description" name="personal_description" rows="3"
+          placeholder="Describe your skill and experience..."></textarea>
       </div>
 
       <!-- Available for Teaching -->
@@ -68,7 +71,8 @@
       <!-- Certificate URL -->
       <div class="mb-4">
         <label for="certificate_url" class="form-label fw-semibold">Certificate URL (optional)</label>
-        <input type="url" class="form-control form-control-theme" id="certificate_url" name="certificate_url" placeholder="https://example.com/certificate">
+        <input type="url" class="form-control form-control-theme" id="certificate_url" name="certificate_url"
+          placeholder="https://example.com/certificate">
       </div>
 
       <!-- Submit -->
@@ -88,100 +92,167 @@
 </div>
 
 <style>
+
+  body {
+    font-family: var(--base-font, 'Poppins', sans-serif);
+  }
+
+
   .add-skill-card {
     position: relative;
-    overflow: visible !important;
-}
-
-/* 🌐 Font from base.html */
-body {
-  font-family: var(--base-font, 'Poppins', sans-serif);
-}
-
-/* 🎨 Card Design */
-.add-skill-card {
-  max-width: 700px;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  backdrop-filter: blur(15px);
-  transition: all 0.3s ease;
-}
-.add-skill-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-}
-
-/* 🟡 Inputs and Selects */
-.form-control-theme, .form-select-theme {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  padding: 10px 14px;
-  transition: border 0.3s, box-shadow 0.3s;
-  background-color: #fffdf5;
-}
-.form-control-theme:focus, .form-select-theme:focus {
-  border-color: #ffd700;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-  outline: none;
-}
-
-/* 🌙 Dark Mode Adjustments */
-body.dark-mode .add-skill-card {
-  background: rgba(30, 30, 30, 0.85);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-  color: #f1f1f1;
-}
-body.dark-mode .form-control-theme,
-body.dark-mode .form-select-theme {
-  background-color: rgba(40, 40, 40, 0.8);
-  color: #fff;
-  border-color: rgba(255, 215, 0, 0.25);
-}
-body.dark-mode .form-control-theme:focus,
-body.dark-mode .form-select-theme:focus {
-  border-color: #ffc107;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-}
-body.dark-mode .back-link {
-  color: #f5c842 !important;
-}
-
-/* 🌈 Buttons */
-.btn-theme {
-  border: none;
-  border-radius: 30px;
-  background: linear-gradient(135deg, #ffd700, #ffcf33);
-  color: #111;
-  transition: all 0.3s ease;
-}
-.btn-theme:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #ffdf40, #ffcf33);
-  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
-}
-body.dark-mode .btn-theme {
-  background: linear-gradient(135deg, #ffb300, #ffc107);
-  color: #111;
-}
-body.dark-mode .btn-theme:hover {
-  background: linear-gradient(135deg, #ffcf40, #ffb300);
-}
-
-/* ⬅️ Back Link */
-.back-link {
-  color: #222;
-  transition: color 0.3s;
-}
-.back-link:hover {
-  color: #ffb300;
-}
-
-/* 📱 Responsive */
-@media (max-width: 768px) {
-  .add-skill-card {
-    padding: 2rem 1.5rem;
+    max-width: 700px;
+    border-radius: 1.5rem;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
-}
+
+  .add-skill-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+
+
+  .add-skill-card .form-control,
+  .add-skill-card .form-control-theme,
+  .add-skill-card .form-select,
+  .add-skill-card .form-select-theme {
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    color: #1e293b;
+    width: 100%;
+  }
+
+  .add-skill-card .form-control:focus,
+  .add-skill-card .form-control-theme:focus,
+  .add-skill-card .form-select:focus,
+  .add-skill-card .form-select-theme:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    outline: none;
+  }
+
+
+  .text-theme {
+    color: #f59e0b;
+  }
+
+
+  body.dark-mode {
+    background-color: #000000 !important;
+    color: #f1f5f9;
+  }
+
+  body.dark-mode .add-skill-card {
+    background: #1A1A1A;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
+  }
+
+  body.dark-mode .form-control-theme,
+  body.dark-mode .form-select-theme,
+  body.dark-mode .add-skill-card .form-control #skill_name,
+  body.dark-mode .add-skill-card input,
+  body.dark-mode .add-skill-card textarea,
+  body.dark-mode .add-skill-card select {
+    background-color: #222 !important;
+    border-color: #444 !important;
+    color: #f1f5f9 !important;
+  }
+
+  body.dark-mode .form-control-theme:focus,
+  body.dark-mode .form-select-theme:focus,
+  body.dark-mode .add-skill-card input:focus,
+  body.dark-mode .add-skill-card textarea:focus,
+  body.dark-mode .add-skill-card select:focus {
+    border-color: #f59e0b !important;
+    background-color: #2a2a2a !important;
+  }
+
+  body.dark-mode .text-muted {
+    color: #a3a3a3 !important;
+  }
+
+  body.dark-mode label {
+    color: #e2e8f0;
+  }
+
+  body.dark-mode .back-link {
+    color: #f59e0b !important;
+  }
+
+  body.dark-mode .add-skill-card input[type="file"]::-webkit-file-upload-button,
+  body.dark-mode .add-skill-card input[type="file"]::file-selector-button {
+    background-color: #333;
+    color: #e2e8f0;
+    border: 1px solid #444;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  body.dark-mode .add-skill-card input[type="file"]:hover::-webkit-file-upload-button,
+  body.dark-mode .add-skill-card input[type="file"]:hover::file-selector-button {
+    background-color: #f59e0b;
+    color: #111;
+    border-color: #f59e0b;
+    cursor: pointer;
+  }
+
+
+  body.dark-mode .form-check-input {
+    background-color: #2b2b2b !important;
+    border-color: #555 !important;
+  }
+  .form-check-input:checked {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+  }
+
+  body.dark-mode .form-check-input:checked {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+  }
+
+
+  .btn-theme {
+    border: none;
+    border-radius: 50rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    transition: all 0.3s ease;
+  }
+
+  .btn-theme:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #fbbf24, #b45309);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    color: #000;
+  }
+
+
+  .back-link {
+    color: #222;
+    transition: color 0.3s;
+  }
+
+  .back-link:hover {
+    color: #f59e0b;
+  }
+
+
+  @media (max-width: 768px) {
+    .add-skill-card {
+      padding: 2rem 1.5rem;
+    }
+  }
 </style>
 {% endblock %}

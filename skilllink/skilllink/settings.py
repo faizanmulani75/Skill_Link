@@ -87,11 +87,14 @@ INSTALLED_APPS = [
     'django_crontab',
     "cloudinary",
     "cloudinary_storage",
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'skilllink.middleware.TimezoneMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -135,26 +138,23 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
-# if DEBUG:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': BASE_DIR / "db.sqlite3",
-#         }
-#     }
-# else:
 # DATABASES = {
-#     'default': dj_database_url.parse(
-#         'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
-#     )
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
+
+import dj_database_url
 DATABASES = {
     'default': dj_database_url.parse(
-        'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+        'postgresql://neondb_owner:npg_p1BHbFMZcz2q@ep-curly-union-a1iec63p-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+        conn_max_age=45,
+        ssl_require=True,
     )
 }
 
+DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 
 
 # Password validation
@@ -181,7 +181,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 

@@ -74,128 +74,182 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <style>
-  /* 🎨 Card Styles */
+
   .edit-profile-card,
   .skill-list-card {
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    backdrop-filter: blur(12px);
-    transition: all 0.4s ease;
+    border-radius: 1.5rem;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   }
 
   .edit-profile-card:hover,
   .skill-list-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   }
 
-  /* 🌙 Dark Mode */
-  .dark-mode .edit-profile-card,
-  .dark-mode .skill-list-card {
-    background: rgba(25, 25, 25, 0.8);
-    color: #eaeaea;
-    border: 1px solid rgba(255, 215, 0, 0.2);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+
+  body.dark-mode {
+    background-color: #000000 !important;
+    color: #f1f5f9;
   }
 
-  /* 🧩 Header */
+  body.dark-mode .edit-profile-card,
+  body.dark-mode .skill-list-card {
+    background: #1A1A1A;
+    color: #f1f5f9;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+  }
+
 
   .header-style {
-    background-color: #FFD700;
-    color: #222;
-    border-top-left-radius: 20px !important;
-    border-top-right-radius: 20px !important;
+    background-color: #fef3c7;
+    color: #b45309;
+    border-top-left-radius: 1.5rem !important;
+    border-top-right-radius: 1.5rem !important;
+    padding: 1.5rem;
   }
 
-  .dark-mode .header-style {
+  body.dark-mode .header-style {
     background-color: #333;
-    color: #FFD700;
+    color: #f59e0b;
+    border-bottom: 1px solid #444;
   }
 
-  /* 🧾 Inputs & Labels */
-  input,
-  textarea,
-  select {
-    border-radius: 10px !important;
-    border: 1px solid #ccc !important;
-    padding: 10px !important;
+  .edit-profile-card input,
+  .edit-profile-card textarea,
+  .edit-profile-card select {
+    border-radius: 0.5rem !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.75rem !important;
     transition: all 0.3s ease;
     background-color: #fff;
+    color: #1e293b;
+    width: 100%;
   }
 
-  input:focus,
-  textarea:focus,
-  select:focus {
-    border-color: #FFD700 !important;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.5) !important;
+  .edit-profile-card input:focus,
+  .edit-profile-card textarea:focus,
+  .edit-profile-card select:focus {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1) !important;
+    outline: none;
   }
 
-  .dark-mode input,
-  .dark-mode textarea,
-  .dark-mode select {
+  body.dark-mode .edit-profile-card input,
+  body.dark-mode .edit-profile-card textarea,
+  body.dark-mode .edit-profile-card select {
     background-color: #222 !important;
-    border-color: #555 !important;
-    color: #eee !important;
+    border-color: #444 !important;
+    color: #f1f5f9 !important;
   }
 
-  .dark-mode input:focus,
-  .dark-mode textarea:focus,
-  .dark-mode select:focus {
-    border-color: #FFD700 !important;
+  body.dark-mode .edit-profile-card input:focus,
+  body.dark-mode .edit-profile-card textarea:focus,
+  body.dark-mode .edit-profile-card select:focus {
+    border-color: #f59e0b !important;
+    background-color: #2a2a2a !important;
   }
 
-  /* 🟡 Buttons */
+
+  body.dark-mode input[type="file"]::-webkit-file-upload-button,
+  body.dark-mode input[type="file"]::file-selector-button {
+    background-color: #333;
+    color: #e2e8f0;
+    border: 1px solid #444;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  body.dark-mode input[type="file"]:hover::-webkit-file-upload-button,
+  body.dark-mode input[type="file"]:hover::file-selector-button {
+    background-color: #f59e0b;
+    color: #111;
+    border-color: #f59e0b;
+    cursor: pointer;
+  }
+
+
+  .edit-profile-card .btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none;
+    color: white !important;
+    border-radius: 50rem;
+  }
+
+  .edit-profile-card .btn-warning:hover {
+    background: linear-gradient(135deg, #fbbf24, #b45309);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  }
+
   .hover-grow {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .hover-grow:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
-  }
-
-  /* 🎯 Skill Items */
   .skill-item {
     transition: background-color 0.3s ease, transform 0.2s ease;
-    border-radius: 10px;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .skill-item:last-child {
+    border-bottom: none;
   }
 
   .skill-item:hover {
-    background-color: #fff3cd;
+    background-color: #f8fafc;
     transform: translateX(5px);
   }
 
-  .dark-mode .skill-item:hover {
-    background-color: #2c2c2c;
+  body.dark-mode .skill-item {
+    border-bottom: 1px solid #333;
   }
 
-  /* 🌑 Dark Mode List Items */
-  .dark-mode .list-group-item {
+  body.dark-mode .skill-item:hover {
+    background-color: #222;
+  }
+
+
+  body.dark-mode .list-group-item {
     background-color: transparent;
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
+    border-color: #333;
+    color: #e2e8f0;
   }
 
-  .dark-mode .list-group-item .text-muted {
-    color: #aaa !important;
+  body.dark-mode .list-group-item .text-muted {
+    color: #a3a3a3 !important;
   }
 
-  /* 🪶 Typography */
+
   .page-title {
-    color: #222;
+    color: #1e293b;
+    font-weight: 800;
   }
 
-  .dark-mode .page-title {
-    color: #fff;
+  body.dark-mode .page-title {
+    color: #f1f5f9;
   }
 
-  /* 📱 Responsive */
+  body.dark-mode label {
+    color: #e2e8f0;
+  }
+
+  body.dark-mode strong {
+    color: #f1f5f9;
+  }
+
+
   @media (max-width: 768px) {
 
     .edit-profile-card,
     .skill-list-card {
-      border-radius: 15px;
       padding: 1.5rem;
     }
 
@@ -205,7 +259,7 @@
   }
 </style>
 
-<!-- 🌟 Scroll Reveal Animation -->
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const reveals = document.querySelectorAll(".reveal");
