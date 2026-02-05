@@ -43,7 +43,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&7f1um-rj65ryxq666sl&8r-6z-1sckm$kjbvwm#$711dnyxbr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 
@@ -60,13 +59,12 @@ ALLOWED_HOSTS = [
 
 # Security settings - disabled for local development
 
-
-# SECURE_SSL_REDIRECT = False
-# SESSION_COOKIE_SECURE = False
-# CSRF_COOKIE_SECURE = False
-# SECURE_BROWSER_XSS_FILTER = False
-# SECURE_CONTENT_TYPE_NOSNIFF = False
-# SECURE_PROXY_SSL_HEADER = None
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_PROXY_SSL_HEADER = None
 
 # Render Security Configuration
 if config('RENDER', default=False, cast=bool):
@@ -74,6 +72,8 @@ if config('RENDER', default=False, cast=bool):
     CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+
 
 # Application definition
 
