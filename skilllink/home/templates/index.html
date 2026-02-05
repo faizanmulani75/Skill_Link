@@ -216,33 +216,9 @@
               class="img-fluid w-100 object-fit-cover" style="height: 200px;">
             {% endif %}
 
-            <div class="skill-hover-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+            <div class="card-overlay d-flex flex-column align-items-center justify-content-center gap-2">
               {% if card.provider.profile.user == request.user %}
-              <button class="btn btn-secondary btn-sm fw-bold mb-2 disabled" style="cursor: not-allowed; opacity: 0.6;">
-                Your Listing
-              </button>
-              {% else %}
-              <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
-                class="btn btn-theme btn-sm fw-bold mb-2">
-                Send Request
-              </a>
-              {% endif %}
-              {% if card.provider.profile.user != request.user %}
-              <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
-                class="btn btn-outline-light btn-sm fw-bold">
-                Request Swap
-              </a>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Card Body -->
-          <div class="card-body text-center p-3">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-
-              {% if card.provider.profile.profile_pic %}
-              <img src="{{ card.provider.profile.profile_pic.url }}" class="rounded-circle me-2" alt="Tutor Pic"
-                style="width:30px; height:30px; object-fit:cover;">
+              <span class="badge bg-secondary">Your Listing</span>
               {% else %}
               <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
                 class="btn btn-warning rounded-pill px-4 fw-bold">Request Session</a>
@@ -251,14 +227,6 @@
                 class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
                 class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
               {% endif %}
-
-              <h6 class="fw-bold mb-0 username">{{ card.provider.profile.user.username }}</h6>
-            </div>
-
-            <p class="skill-name mb-1">{{ card.skill.name }}</p>
-            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-              <span class="text-warning fw-bold">{{ card.profile_skill.average_rating|floatformat:1 }} ★</span>
-              <span class="badge bg-warning text-dark fw-semibold">{{ card.profile_skill.token_cost }} Tokens</span>
             </div>
           </div>
 
@@ -270,6 +238,29 @@
               <img src="{{ card.provider.profile.profile_pic.url }}"
                 class="rounded-circle me-3 border border-2 border-white shadow-sm"
                 style="width: 45px; height: 45px; object-fit: cover;">
+              <img src="{{ card.provider.profile.profile_pic.url }}"
+                class="rounded-circle me-3 border border-2 border-white shadow-sm"
+                style="width: 45px; height: 45px; object-fit: cover;">
+              {% else %}
+              <a href="{% url 'create_booking' card.skill.id card.provider.profile.id %}"
+                class="btn btn-warning rounded-pill px-4 fw-bold">Request Session</a>
+              <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
+                class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
+              {% endif %}
+              <div>
+                <h6 class="mb-0 fw-bold text-dark">{{ card.provider.profile.user.username }}</h6>
+                <small class="text-muted">Mentor</small>
+              </div>
+              <div class="ms-auto">
+                <span class="badge bg-soft-warning text-warning fw-bold">
+                  <i class="bi bi-star-fill small me-1"></i>{{ card.profile_skill.average_rating|floatformat:1 }}
+                </span>
+              </div>
+            </div>
+
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+              {% if card.provider.profile.profile_pic %}
               <img src="{{ card.provider.profile.profile_pic.url }}"
                 class="rounded-circle me-3 border border-2 border-white shadow-sm"
                 style="width: 45px; height: 45px; object-fit: cover;">

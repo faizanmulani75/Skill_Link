@@ -5,8 +5,7 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center vh-100">
-  <div class="card shadow-lg border-0 register-card animate__animated animate__fadeInUp"
-    style="max-width: 420px; width: 100%; border-radius: 18px; background: var(--card-bg); border: 2px solid var(--accent-color);">
+  <div class="card shadow-lg border-0 register-card animate__animated animate__fadeInUp">
     <div class="card-body p-4">
 
       <!-- Header -->
@@ -79,78 +78,152 @@
 
 <!-- Styles -->
 <style>
-  /* Font is inherited from base.html */
-
-  /* Theme variables (synced with dark mode toggle) */
   :root {
-    --card-bg: linear-gradient(135deg, #fff8dc, #fdf5e6);
-    --accent-color: #f1c40f;
-    --text-color: #1a1a1a;
+    --card-bg: #ffffff;
+    --accent-color: #f59e0b;
+    --text-color: #111827;
   }
 
-  .dark-mode {
-    --card-bg: linear-gradient(135deg, #1f1f1f, #2b2b2b);
-    --accent-color: #ffd700;
-    --text-color: #f8f9fa;
-  }
 
-  /* Card hover */
   .register-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: var(--card-bg);
+    border-radius: 1.5rem !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .register-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
   }
 
-  /* Inputs */
-  input {
-    border-radius: 10px !important;
-    border: 1px solid #ddd !important;
-    padding: 10px !important;
+
+  .register-card input {
+    border-radius: 0.5rem !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.75rem !important;
     transition: all 0.3s ease;
+    background-color: #fff;
+    color: #1e293b;
+    width: 100%;
   }
 
-  input:focus {
-    border-color: var(--accent-color) !important;
-    box-shadow: 0 0 8px rgba(241, 196, 15, 0.6) !important;
+  .register-card input:focus {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1) !important;
+    outline: none;
   }
 
   /* Password toggle button */
+  .password-toggle {
+    border-top-right-radius: 0.5rem !important;
+    border-bottom-right-radius: 0.5rem !important;
+    border-color: #cbd5e1 !important;
+    transition: all 0.3s ease;
+  }
+
+  .password-toggle:hover {
+    background-color: #fef3c7;
+    border-color: #f59e0b !important;
+  }
+
   .password-toggle i {
     transition: color 0.3s ease;
+    color: #64748b;
   }
 
   .password-toggle:hover i {
-    color: var(--accent-color);
+    color: #f59e0b;
   }
 
-  /* Hover grow */
+  /* Buttons */
+  .register-card .btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 50rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+
   .hover-grow {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .hover-grow:hover {
+  .register-card .hover-grow:hover {
+    background: linear-gradient(135deg, #fbbf24, #b45309);
+    color: #fff;
     transform: scale(1.05);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
   }
 
-  /* Mode text color */
+  /* DARK MODE */
+  body.dark-mode {
+    background-color: #000000 !important;
+  }
+
+  body.dark-mode .register-card {
+    background: #1A1A1A;
+    border: 1px solid #333;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.05);
+  }
+
+  body.dark-mode .mode-text {
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode .register-card input {
+    background-color: #222 !important;
+    border-color: #444 !important;
+    color: #f1f5f9;
+  }
+
+  body.dark-mode .register-card input:focus {
+    border-color: #f59e0b !important;
+    background-color: #2a2a2a !important;
+  }
+
+  body.dark-mode .password-toggle {
+    background-color: #333;
+    border-color: #444 !important;
+  }
+
+  body.dark-mode .password-toggle i {
+    color: #a3a3a3;
+  }
+
+  body.dark-mode .password-toggle:hover {
+    background-color: #444;
+  }
+
+  body.dark-mode .password-toggle:hover i {
+    color: #f59e0b;
+  }
+
+
   .mode-text {
     color: var(--text-color) !important;
   }
 
   .accent-link {
-    color: var(--accent-color) !important;
+    color: #d97706 !important;
+    transition: color 0.2s;
   }
 
   .accent-link:hover {
     text-decoration: underline;
+    color: #b45309;
+  }
+
+  body.dark-mode .accent-link {
+    color: #f59e0b !important;
   }
 </style>
 
-<!-- Animate.css -->
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

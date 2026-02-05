@@ -36,6 +36,9 @@ class Booking(models.Model):
     review_pending = models.BooleanField(default=False)
     tokens_released = models.BooleanField(default=False) 
     times_taught_incremented = models.BooleanField(default=False)
+    requester_joined = models.BooleanField(default=False)
+    provider_joined = models.BooleanField(default=False)
+    actual_start_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.requester.user.username} booked {self.skill.name} from {self.provider.user.username}"

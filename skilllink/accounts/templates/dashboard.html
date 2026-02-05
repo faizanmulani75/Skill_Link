@@ -195,7 +195,7 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="fw-bold text-dark animate__animated animate__fadeInDown">
+            <h1 class="fw-bold animate__animated animate__fadeInDown">
                 Welcome, {{ user.first_name|default:user.username }}!
             </h1>
             <div class="d-flex align-items-center mt-2">
@@ -205,7 +205,7 @@
                 <div class="level-progress-container flex-grow-1" style="max-width: 300px;">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <small class="text-muted">{{ profile.experience_points }} XP</small>
-                        {% if profile.level < 10 %} <small class="text-muted">{{ profile.get_xp_for_level|add:profile.level|add:1 }} XP</small>
+                        {% if profile.level < 50 %} <small class="text-muted">{{ profile.get_xp_for_level|add:profile.level|add:1 }} XP</small>
                             {% else %}
                             <small class="text-success fw-bold">MAX LEVEL</small>
                             {% endif %}
@@ -270,20 +270,19 @@
 
         <div class="col-md-3">
             <div
-                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-2s">
+                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-3s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Swap Requests</h5>
-                    <p class="display-6 fw-bold">{{ swaps_pending }}</p>
+                    <p class="display-6 fw-bold" id="dashboard-swap-count">{{ swaps_pending }}</p>
                     <a href="{% url 'manage_swap_requests' %}"
-                        class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
-                        Swaps</a>
+                        class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage Swaps</a>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
             <div
-                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-3s">
+                class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-4s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Reports & Reviews</h5>
                     <p class="display-6 fw-bold"><i class="bi bi-star-fill text-warning"></i></p>
@@ -618,19 +617,6 @@
         font-weight: 600;
         font-size: 0.95rem;
         box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        animation: pulseBadge 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseBadge {
-
-        0%,
-        100% {
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        50% {
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
-        }
     }
 
     /* Level Progress Bar */
@@ -639,7 +625,6 @@
         background-color: #E5E7EB;
         border-radius: 50px;
         overflow: hidden;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .level-progress-fill {
@@ -647,25 +632,11 @@
         background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
         border-radius: 50px;
         transition: width 0.5s ease-in-out;
-        box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
     }
 
-    /* Dark Mode Styles */
     body.dark-mode .level-badge {
         background: linear-gradient(135deg, #A78BFA 0%, #06B6D4 100%);
-        animation: pulseBadgeDark 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseBadgeDark {
-
-        0%,
-        100% {
-            box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
-        }
-
-        50% {
-            box-shadow: 0 6px 20px rgba(167, 139, 250, 0.6);
-        }
+        box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4);
     }
 
     body.dark-mode .level-progress-bar {
@@ -674,7 +645,17 @@
 
     body.dark-mode .level-progress-fill {
         background: linear-gradient(90deg, #A78BFA 0%, #06B6D4 100%);
-        box-shadow: 0 0 10px rgba(6, 182, 212, 0.6);
+    }
+
+    /* Mobile Responsive Adjustments */
+    @media (max-width: 768px) {
+        .dashboard-card .card-body {
+            padding: 1rem;
+        }
+
+        #tokenChart {
+            max-height: 250px !important;
+        }
     }
 </style>
 

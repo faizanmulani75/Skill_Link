@@ -535,3 +535,15 @@ def public_profile(request, username):
         "analytics_earned": json.dumps(earned_data, cls=DjangoJSONEncoder),
     }
     return render(request, "public_profile.html", context)
+
+
+@login_required
+@require_POST
+def acknowledge_level_up(request):
+    try:
+        profile = request.user.profile
+        profile.show_level_up_modal = False
+        profile.save(update_fields=['show_level_up_modal'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
