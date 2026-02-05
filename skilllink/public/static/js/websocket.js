@@ -6,6 +6,7 @@ class WebSocketManager {
         this.maxReconnectAttempts = 5;
         this.reconnectInterval = 3000; // 3 seconds
         this.connect();
+        WebSocketManager.initGlobalToast();
     }
 
     connect() {
@@ -54,15 +55,18 @@ class WebSocketManager {
             case 'notification':
                 this.showNotification(data.notification);
                 this.updateUnreadCount(data.unread_count);
+                window.dispatchEvent(new CustomEvent('notificationReceived', { detail: data }));
                 break;
             
             case 'token_update': 
                 this.updateTokenBalance(data.balance);
+                window.dispatchEvent(new CustomEvent('tokenUpdated', { detail: data }));
                 break;
             
             case 'status_update':
                 this.handleStatusUpdate(data);
                 this.updateUnreadCount(data.unread_count);
+                // handleStatusUpdate already dispatches 'bookingStatusChanged'
                 break;
             
             case 'new_booking_request':
@@ -75,15 +79,18 @@ class WebSocketManager {
 
             case 'new_swap_request':
                 this.incrementCounter('dashboard-swap-count');
+                window.dispatchEvent(new CustomEvent('newSwapRequest', { detail: data }));
                 this.showNotification({title: 'New Swap Request', body: 'Someone wants to swap skills with you!', link: '/skills/manage-requests/'});
                 break;
                 
             case 'notification_history':
                 this.updateUnreadCount(data.unread_count);
+                window.dispatchEvent(new CustomEvent('notificationHistoryReceived', { detail: data }));
                 break;
                 
             case 'unread_count_update':
                 this.updateUnreadCount(data.count);
+                window.dispatchEvent(new CustomEvent('unreadCountUpdated', { detail: data }));
                 break;
                 
             case 'force_logout':
@@ -94,44 +101,67 @@ class WebSocketManager {
     }
 
     showNotification(notification) {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.style.cssText = 'position:fixed; top:80px; right:20px; z-index:10500;';
-            document.body.appendChild(container);
-        }
+        // Map notification format to toast format
+        window.showGlobalToast({
+            title: notification.title,
+            body: notification.body,
+            link: notification.link,
+            type: 'info' // Default type
+        });
+    }
 
-
-        container.innerHTML = '';
-
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        const bgStyle = isDarkMode ? 'background: #1e1e1e; color: #f5f5f5;' : 'background: white; color: #000;';
-        const textClass = isDarkMode ? 'text-light' : 'text-dark';
-        const btnCloseClass = isDarkMode ? 'btn-close-white' : '';
-        const id = 'toast-' + Date.now();
-
-        const html = `
-            <div id="${id}" class="toast show animate__animated animate__fadeInRight" style="${bgStyle} border-left: 5px solid #f9b934; margin-bottom: 10px; width: 300px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <div class="toast-header border-0 bg-transparent">
-                    <strong class="me-auto ${textClass}">${notification.title}</strong>
-                    <button type="button" class="btn-close ${btnCloseClass}" onclick="document.getElementById('${id}').remove()"></button>
-                </div>
-                <div class="toast-body ${textClass} pt-0">
-                    ${notification.body}
-                    ${notification.link ? `<hr class="my-2" style="border-color: ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}"><a href="${notification.link}" class="btn btn-sm btn-warning w-100 fw-bold">View Details</a>` : ''}
-                </div>
-            </div>`;
-
-        container.insertAdjacentHTML('beforeend', html);
-
-        setTimeout(() => {
-            const t = document.getElementById(id);
-            if (t) {
-                t.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
-                setTimeout(() => t.remove(), 1000);
+    // Global Toast Function
+    static initGlobalToast() {
+        window.showGlobalToast = function(notif) {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position:fixed; top:80px; right:20px; z-index:10500;';
+                document.body.appendChild(container);
             }
-        }, 5000);
+
+            container.innerHTML = ''; // Single toast policy
+
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const bgStyle = isDarkMode ? 'background: #1e1e1e; color: #f5f5f5;' : 'background: white; color: #000;';
+            const textClass = isDarkMode ? 'text-light' : 'text-dark';
+            const btnCloseClass = isDarkMode ? 'btn-close-white' : '';
+            
+            let borderColor = '#f9b934';
+            let btnColor = 'btn-warning';
+
+            if (notif.type === 'error') {
+                borderColor = '#ef4444';
+                btnColor = 'btn-danger';
+            } else if (notif.type === 'success') {
+                borderColor = '#10b981';
+                btnColor = 'btn-success';
+            }
+
+            const id = 'toast-' + Date.now();
+            const html = `
+                <div id="${id}" class="toast show animate__animated animate__fadeInRight" style="${bgStyle} border-left: 5px solid ${borderColor}; margin-bottom: 10px; width: 300px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <div class="toast-header border-0 bg-transparent">
+                        <strong class="me-auto ${textClass}">${notif.title}</strong>
+                        <button type="button" class="btn-close ${btnCloseClass}" onclick="document.getElementById('${id}').remove()"></button>
+                    </div>
+                    <div class="toast-body ${textClass} pt-0">
+                        ${notif.body}
+                        ${notif.link ? `<hr class="my-2" style="border-color: ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}"><a href="${notif.link}" class="btn btn-sm ${btnColor} w-100 fw-bold">View Details</a>` : ''}
+                    </div>
+                </div>`;
+
+            container.insertAdjacentHTML('beforeend', html);
+
+            setTimeout(() => {
+                const t = document.getElementById(id);
+                if (t) {
+                    t.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
+                    setTimeout(() => t.remove(), 1000);
+                }
+            }, 5000);
+        };
     }
 
     updateUnreadCount(count) {
@@ -204,3 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.webSocketManager = new WebSocketManager();
     }
 });
+
+// Initialize global toast immediately so it's available for Django messages
+WebSocketManager.initGlobalToast();

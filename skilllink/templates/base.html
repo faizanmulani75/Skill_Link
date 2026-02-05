@@ -794,62 +794,48 @@
   {% if user.is_authenticated %}
   <script>
     (function () {
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-      const userSocket = new WebSocket(wsProtocol + window.location.host + '/ws/user/');
       const badge = document.getElementById('notification-badge');
       const list = document.getElementById('notification-list');
       const markReadBtn = document.getElementById('mark-all-read');
 
-      userSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
+      // Listen for WebSocket events from websocket.js
 
-        if (data.type === 'notification_history') {
-          updateHistory(data.notifications);
-          updateBadge(data.unread_count);
-        }
-        else if (data.type === 'notification') {
-          if (data.notification.link && window.location.pathname === data.notification.link) {
-            userSocket.send(JSON.stringify({
+      window.addEventListener('notificationHistoryReceived', (e) => {
+        updateHistory(e.detail.notifications);
+        // Badge updated by websocket.js
+      });
+
+      window.addEventListener('notificationReceived', (e) => {
+        const n = e.detail.notification;
+
+        // Auto-mark read if we are on the page linked
+        if (n.link && window.location.pathname === n.link) {
+          if (window.webSocketManager && window.webSocketManager.socket) {
+            window.webSocketManager.socket.send(JSON.stringify({
               'type': 'mark_single_read',
-              'notification_id': data.notification.id
+              'notification_id': n.id
             }));
-          } else {
-            // showGlobalToast(data.notification); // Handled by websocket.js
-            addNotificationToList(data.notification, true);
-            updateBadge(data.unread_count);
           }
-        }
-        else if (data.type === 'status_update') {
-          // showGlobalToast({ title: "Booking Update", body: data.message, link: "/meetings/" }); // Handled by websocket.js
-          window.dispatchEvent(new CustomEvent('bookingStatusChanged', { detail: data }));
-          updateBadge(data.unread_count);
-        }
-        else if (data.type === 'unread_count_update') {
-          updateBadge(data.count);
-          document.querySelectorAll('.notification-item').forEach(i => i.classList.remove('bg-light-yellow'));
-        }
-        else if (data.type === 'token_update') {
-          document.querySelectorAll('a[href*="token_balance"]').forEach(link => {
-            link.innerHTML = `Tokens ${data.balance}`;
-          });
-        }
-      };
-
-      markReadBtn.onclick = () => {
-        userSocket.send(JSON.stringify({ 'type': 'mark_read' }));
-      };
-
-      function updateBadge(count) {
-        if (count > 0) {
-          badge.innerText = count;
-          badge.classList.remove('d-none');
         } else {
-          badge.classList.add('d-none');
+          addNotificationToList(n, true);
         }
+      });
+
+      window.addEventListener('unreadCountUpdated', (e) => {
+        document.querySelectorAll('.notification-item').forEach(i => i.classList.remove('bg-light-yellow'));
+      });
+
+      // Mark All Read Button
+      if (markReadBtn) {
+        markReadBtn.onclick = () => {
+          if (window.webSocketManager && window.webSocketManager.socket) {
+            window.webSocketManager.socket.send(JSON.stringify({ 'type': 'mark_read' }));
+          }
+        };
       }
 
       function updateHistory(notifications) {
-        if (notifications.length === 0) return;
+        if (!notifications || notifications.length === 0) return;
         list.innerHTML = '';
         notifications.forEach(n => addNotificationToList(n));
       }
@@ -858,7 +844,6 @@
         const item = document.createElement('li');
         item.className = `notification-item p-3 border-bottom ${n.is_read ? '' : 'bg-light-yellow'}`;
         item.style.transition = 'background 0.3s ease';
-
 
         let timeDisplay = 'Just now';
         if (n.timestamp) {
@@ -881,84 +866,26 @@
           `;
 
         const link = item.querySelector('.notification-link');
-        link.onclick = (e) => {
-          if (!n.is_read) {
-            userSocket.send(JSON.stringify({
-              'type': 'mark_single_read',
-              'notification_id': n.id
-            }));
-
-            item.classList.remove('bg-light-yellow');
-            n.is_read = true;
-          }
-        };
+        if (link) {
+          link.onclick = (e) => {
+            if (!n.is_read) {
+              if (window.webSocketManager && window.webSocketManager.socket) {
+                window.webSocketManager.socket.send(JSON.stringify({
+                  'type': 'mark_single_read',
+                  'notification_id': n.id
+                }));
+              }
+              item.classList.remove('bg-light-yellow');
+              n.is_read = true;
+            }
+          };
+        }
 
         if (isNew) list.prepend(item);
         else list.appendChild(item);
 
         if (list.querySelector('.bi-bell-slash')) list.innerHTML = '';
       }
-
-      userSocket.onclose = () => console.warn('User socket closed. Static fallback active.');
-
-
-      window.showGlobalToast = function (notif) {
-
-        let container = document.getElementById('toast-container');
-        if (!container) {
-          container = document.createElement('div');
-          container.id = 'toast-container';
-          container.style.cssText = 'position:fixed; top:80px; right:20px; z-index:10500;';
-          document.body.appendChild(container);
-        }
-
-
-        container.innerHTML = '';
-
-
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        const bgStyle = isDarkMode ? 'background: #1e1e1e; color: #f5f5f5;' : 'background: white; color: #000;';
-        const textClass = isDarkMode ? 'text-light' : 'text-dark';
-        const btnCloseClass = isDarkMode ? 'btn-close-white' : '';
-
-
-        let borderColor = '#f9b934';
-        let btnColor = 'btn-warning';
-
-        if (notif.type === 'error') {
-          borderColor = '#ef4444';
-          btnColor = 'btn-danger';
-        } else if (notif.type === 'success') {
-          borderColor = '#10b981';
-          btnColor = 'btn-success';
-        }
-
-        const id = 'toast-' + Date.now();
-
-        const html = `
-            <div id="${id}" class="toast show animate__animated animate__fadeInRight" style="${bgStyle} border-left: 5px solid ${borderColor}; margin-bottom: 10px; width: 300px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <div class="toast-header border-0 bg-transparent">
-                    <strong class="me-auto ${textClass}">${notif.title}</strong>
-                    <button type="button" class="btn-close ${btnCloseClass}" onclick="document.getElementById('${id}').remove()"></button>
-                </div>
-                <div class="toast-body ${textClass} pt-0">
-                    ${notif.body}
-                    ${notif.link ? `<hr class="my-2" style="border-color: ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}"><a href="${notif.link}" class="btn btn-sm ${btnColor} w-100 fw-bold">View Details</a>` : ''}
-                </div>
-            </div>`;
-
-
-        container.insertAdjacentHTML('beforeend', html);
-
-
-        setTimeout(() => {
-          const t = document.getElementById(id);
-          if (t) {
-            t.classList.replace('animate__fadeInRight', 'animate__fadeOutRight');
-            setTimeout(() => t.remove(), 1000);
-          }
-        }, 5000);
-      };
     })();
   </script>
   {% endif %}
