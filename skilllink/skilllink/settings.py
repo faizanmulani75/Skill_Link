@@ -48,10 +48,10 @@ DEBUG = True
 
 # Host/Domain names that this Django site can serve
 ALLOWED_HOSTS = [
-    # "localhost",
-    # "127.0.0.1",
-    # "0.0.0.0",
-    # "skill-link-ptzd.onrender.com",
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "skill-link-ptzd.onrender.com",
 ]
 
 
