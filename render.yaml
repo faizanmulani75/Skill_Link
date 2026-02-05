@@ -15,6 +15,26 @@ services:
         value: skilllink.settings
       - key: CLOUDINARY_URL
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DEBUG
+        value: 'false'
+      - key: RENDER
+        value: 'true'
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: ZOOM_CLIENT_ID
+        sync: false
+      - key: ZOOM_CLIENT_SECRET
+        sync: false
+      - key: ZOOM_ACCOUNT_ID
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
       - key: REDIS_URL
         fromService:
           type: redis

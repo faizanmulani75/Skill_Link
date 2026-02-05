@@ -43,7 +43,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&7f1um-rj65ryxq666sl&8r-6z-1sckm$kjbvwm#$711dnyxbr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 
 # Host/Domain names that this Django site can serve
@@ -67,6 +68,12 @@ ALLOWED_HOSTS = [
 # SECURE_CONTENT_TYPE_NOSNIFF = False
 # SECURE_PROXY_SSL_HEADER = None
 
+# Render Security Configuration
+if config('RENDER', default=False, cast=bool):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
