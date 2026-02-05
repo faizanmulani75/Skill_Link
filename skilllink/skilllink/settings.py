@@ -128,11 +128,21 @@ ASGI_APPLICATION = "skilllink.asgi.application"
 # Channels Configuration
 # Default to InMemory in dev if no REDIS_HOST is set, but keeping flexibility
 # For strict local dev without Redis:
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+if config('REDIS_URL', default=None):
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [config('REDIS_URL')],
+            },
+        },
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
 
 
 # Database

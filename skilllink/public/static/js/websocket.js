@@ -3,16 +3,42 @@ class WebSocketManager {
     constructor() {
         this.socket = null;
         this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.reconnectInterval = 3000; // 3 seconds
+        this.maxReconnectAttempts = 10;
+        this.baseReconnectDelay = 1000; // Start with 1 second
+        this.maxReconnectDelay = 30000; // Cap at 30 seconds
+        
+        // Bind methods
+        this.connect = this.connect.bind(this);
+        this.handleReconnect = this.handleReconnect.bind(this);
+        
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            console.log('Network restored. Reconnecting WebSocket...');
+            this.reconnectAttempts = 0;
+            this.connect();
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('Network lost. Pausing WebSocket reconnection.');
+            if (this.socket) {
+                this.socket.close();
+            }
+        });
+
         this.connect();
         WebSocketManager.initGlobalToast();
     }
 
     connect() {
+        if (!navigator.onLine) {
+             console.log('Offline. Waiting for network...');
+             return;
+        }
+
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/user/`;
 
+        console.log(`Connecting to WebSocket at ${wsUrl}`);
         this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {
@@ -22,13 +48,20 @@ class WebSocketManager {
         };
 
         this.socket.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-            this.handleMessage(data);
+            try {
+                const data = JSON.parse(e.data);
+                this.handleMessage(data);
+            } catch (err) {
+                console.error('Error parsing WebSocket message:', err);
+            }
         };
 
         this.socket.onclose = (e) => {
             console.log('WebSocket disconnected', e.reason);
-            this.handleReconnect();
+            // Only reconnect if not closed cleanly
+            if (!e.wasClean) {
+                this.handleReconnect();
+            }
         };
 
         this.socket.onerror = (e) => {
@@ -39,11 +72,27 @@ class WebSocketManager {
 
     handleReconnect() {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            // Calculate exponential backoff delay with jitter
+            const delay = Math.min(
+                this.baseReconnectDelay * Math.pow(1.5, this.reconnectAttempts), 
+                this.maxReconnectDelay
+            );
+            
+            // Add slight randomness to prevent thundering herd
+            const jitter = Math.random() * 1000; 
+            const finalDelay = delay + jitter;
+
             this.reconnectAttempts++;
-            console.log(`Reconnecting attempt ${this.reconnectAttempts}...`);
-            setTimeout(() => this.connect(), this.reconnectInterval);
+            console.log(`Reconnecting attempt ${this.reconnectAttempts} in ${Math.round(finalDelay)}ms...`);
+            
+            setTimeout(this.connect, finalDelay);
         } else {
-            console.error('Max reconnect attempts reached');
+            console.error('Max reconnect attempts reached. Please refresh the page.');
+            this.showNotification({
+                title: 'Connection Lost',
+                body: 'Please refresh the page to reconnect.',
+                type: 'error'
+            });
         }
     }
 

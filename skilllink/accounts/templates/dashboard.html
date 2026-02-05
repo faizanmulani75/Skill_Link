@@ -31,24 +31,6 @@
         let colors = getChartColors(isDark);
 
         const tokenChart = new Chart(ctx, {
-        // Theme colors
-        const style = getComputedStyle(document.body);
-        const isDark = document.body.classList.contains('dark-mode');
-
-        const getChartColors = (isDark) => {
-            return {
-                text: isDark ? '#e2e8f0' : '#64748b',
-                grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                earnedBg: isDark ? 'rgba(245, 158, 11, 0.7)' : 'rgba(245, 158, 11, 0.6)',
-                earnedBorder: '#f59e0b',
-                spentBg: isDark ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.6)',
-                spentBorder: '#ef4444'
-            };
-        };
-
-        let colors = getChartColors(isDark);
-
-        const tokenChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: dates,
@@ -61,20 +43,10 @@
                         borderWidth: 1,
                         borderRadius: 4,
                         maxBarThickness: 40
-                        backgroundColor: colors.earnedBg,
-                        borderColor: colors.earnedBorder,
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        maxBarThickness: 40
                     },
                     {
                         label: 'Tokens Spent',
                         data: spent,
-                        backgroundColor: colors.spentBg,
-                        borderColor: colors.spentBorder,
-                        borderWidth: 1,
-                        borderRadius: 4,
-                        maxBarThickness: 40
                         backgroundColor: colors.spentBg,
                         borderColor: colors.spentBorder,
                         borderWidth: 1,
@@ -101,31 +73,8 @@
                         bodyFont: { family: "'Inter', sans-serif", size: 13 }
                     }
                 },
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: colors.text,
-                            font: { family: "'Inter', sans-serif", weight: '600' }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 12,
-                        cornerRadius: 8,
-                        titleFont: { family: "'Inter', sans-serif", size: 14 },
-                        bodyFont: { family: "'Inter', sans-serif", size: 13 }
-                    }
-                },
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        grid: { color: colors.grid, borderColor: colors.grid },
-                        ticks: { color: colors.text, font: { family: "'Inter', sans-serif" } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: colors.text, font: { family: "'Inter', sans-serif" } }
                         beginAtZero: true,
                         grid: { color: colors.grid, borderColor: colors.grid },
                         ticks: { color: colors.text, font: { family: "'Inter', sans-serif" } }
@@ -159,35 +108,11 @@
         });
 
         observer.observe(document.body, { attributes: true });
-
-        const observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-                if (mutation.attributeName === "class") {
-                    const isDarkMode = document.body.classList.contains('dark-mode');
-                    const newColors = getChartColors(isDarkMode);
-
-                    tokenChart.options.plugins.legend.labels.color = newColors.text;
-                    tokenChart.options.scales.y.grid.color = newColors.grid;
-                    tokenChart.options.scales.y.grid.borderColor = newColors.grid;
-                    tokenChart.options.scales.y.ticks.color = newColors.text;
-                    tokenChart.options.scales.x.ticks.color = newColors.text;
-
-                    tokenChart.data.datasets[0].backgroundColor = newColors.earnedBg;
-                    tokenChart.data.datasets[1].backgroundColor = newColors.spentBg;
-
-                    tokenChart.update();
-                }
-            });
-        });
-
-        observer.observe(document.body, { attributes: true });
     });
 </script>
 {% endblock %}
 
 {% block content %}
-{% include 'includes/platform_review_modal.html' %}
-{% include 'includes/level_up_modal.html' %}
 {% include 'includes/platform_review_modal.html' %}
 {% include 'includes/level_up_modal.html' %}
 <div class="container mt-5">
@@ -225,7 +150,6 @@
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Token Balance</h5>
                     <p class="display-6 fw-bold" id="dashboard-token-balance">{{ profile.token_balance }}</p>
-                    <p class="display-6 fw-bold" id="dashboard-token-balance">{{ profile.token_balance }}</p>
                     <a href="{% url 'token_balance' %}" class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
                         Tokens</a>
                 </div>
@@ -238,7 +162,6 @@
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">My Skills</h5>
                     {% if user_skills %}
-                    <div class="d-flex  flex-wrap justify-content-center mb-3">
                     <div class="d-flex  flex-wrap justify-content-center mb-3">
                         {% for skill in user_skills %}
                         <span class="badge bg-warning text-dark fw-semibold me-2 mb-2 p-2 shadow-sm">
@@ -260,7 +183,6 @@
                 class="card shadow-sm text-center dashboard-card animate__animated animate__fadeInUp animate__delay-2s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Incoming Bookings</h5>
-                    <p class="display-6 fw-bold" id="dashboard-incoming-count">{{ incoming_requests.count }}</p>
                     <p class="display-6 fw-bold" id="dashboard-incoming-count">{{ incoming_requests.count }}</p>
                     <a href="{% url 'booking_list' %}" class="btn btn-theme fw-bold shadow-sm dashboard-btn">Manage
                         Bookings</a>
@@ -296,12 +218,8 @@
     <div class="row mb-5">
         <div class="col-md-8">
             <div class="card shadow-sm dashboard-card animate__animated animate__fadeInUp animate__delay-5s">
-            <div class="card shadow-sm dashboard-card animate__animated animate__fadeInUp animate__delay-5s">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold">Token Activity (Last 30 Days)</h5>
-                    <div style="height: 350px; position: relative; width: 100%;">
-                        <canvas id="tokenChart"></canvas>
-                    </div>
                     <div style="height: 350px; position: relative; width: 100%;">
                         <canvas id="tokenChart"></canvas>
                     </div>
@@ -310,17 +228,14 @@
         </div>
         <div class="col-md-4">
             <div class="card shadow-sm dashboard-card animate__animated animate__fadeInUp animate__delay-5s h-100">
-            <div class="card shadow-sm dashboard-card animate__animated animate__fadeInUp animate__delay-5s h-100">
                 <div class="card-body text-center d-flex flex-column justify-content-center">
                     <h5 class="card-title fw-semibold mb-4">Meeting Stats</h5>
                     <div class="mb-3">
                         <h2 class="display-4 fw-bold text-success">{{ total_meetings_hosted }}</h2>
                         <p class="text-success fw-bold">Hosted</p>
-                        <p class="text-success fw-bold">Hosted</p>
                     </div>
                     <div>
                         <h2 class="display-4 fw-bold text-primary">{{ total_meetings_attended }}</h2>
-                        <p class="text-primary fw-bold">Attended</p>
                         <p class="text-primary fw-bold">Attended</p>
                     </div>
                 </div>
@@ -329,7 +244,6 @@
     </div>
 
     <!-- Incoming Booking Requests -->
-    <!-- <div class="mb-5">
     <!-- <div class="mb-5">
         <h3 class="mb-3 fw-bold text-dark animate__animated animate__fadeInLeft">Incoming Booking Requests</h3>
         {% if incoming_requests %}
@@ -369,10 +283,8 @@
         <p class="text-muted">No incoming requests.</p>
         {% endif %}
     </div> -->
-    </div> -->
 
     <!-- My Bookings -->
-    <!-- <div class="mb-5">
     <!-- <div class="mb-5">
         <h3 class="mb-3 fw-bold text-dark animate__animated animate__fadeInLeft">My Bookings (Requester)</h3>
         {% if bookings_made %}
@@ -405,23 +317,10 @@
         <p class="text-muted">No bookings made yet.</p>
         {% endif %}
     </div> -->
-    </div> -->
 
 </div>
 
 <style>
-    :root {
-        --dash-card-bg: #fff;
-        --dash-shadow: rgba(0, 0, 0, 0.05);
-        --dash-border: rgba(0, 0, 0, 0.05);
-    }
-
-    body.dark-mode {
-        --dash-card-bg: #1A1A1A;
-        --dash-shadow: rgba(255, 255, 255, 0.05);
-        --dash-border: #333;
-    }
-
     :root {
         --dash-card-bg: #fff;
         --dash-shadow: rgba(0, 0, 0, 0.05);
@@ -441,21 +340,14 @@
         border-radius: 1.5rem;
         box-shadow: 0 4px 6px var(--dash-shadow);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        background: var(--dash-card-bg);
-        border: 1px solid var(--dash-border);
-        border-radius: 1.5rem;
-        box-shadow: 0 4px 6px var(--dash-shadow);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .dashboard-card:hover,
     .booking-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     }
 
-    /* Buttons  */
     /* Buttons  */
     .btn-theme {
         background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -463,21 +355,11 @@
         border-radius: 50rem;
         padding: 0.75rem 1.5rem;
         font-weight: bold;
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: #000000;
-        border-radius: 50rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: bold;
         transition: all 0.3s ease;
-        border: none;
         border: none;
     }
 
     .btn-theme:hover {
-        background: linear-gradient(135deg, #fbbf24, #b45309);
-        color: #000000;
-        transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
         background: linear-gradient(135deg, #fbbf24, #b45309);
         color: #000000;
         transform: scale(1.05);
@@ -488,20 +370,8 @@
     body.dark-mode {
         background: #000000 !important;
         color: #f1f5f9 !important;
-        background: #000000 !important;
-        color: #f1f5f9 !important;
     }
 
-    body.dark-mode .dashboard-card {
-        background: #222222 !important;
-        border: 1px solid #444 !important;
-        box-shadow: 0 4px 6px rgba(255, 255, 255, 0.08);
-    }
-
-    body.dark-mode .card,
-    body.dark-mode .card-body {
-        background-color: transparent !important;
-        color: #f1f5f9 !important;
     body.dark-mode .dashboard-card {
         background: #222222 !important;
         border: 1px solid #444 !important;
@@ -516,12 +386,7 @@
 
     body.dark-mode h1,
     body.dark-mode h2,
-    body.dark-mode h2,
     body.dark-mode h3,
-    body.dark-mode h5 {
-        color: #f1f5f9 !important;
-    }
-
     body.dark-mode h5 {
         color: #f1f5f9 !important;
     }
@@ -693,9 +558,7 @@
                             body.appendChild(btn);
                         }
 
-
                     } else if (data.new_status === 'scheduled') {
-
 
                         if (data.is_provider && data.action_urls.start_meeting_url) {
                             const btn = document.createElement('a');
@@ -732,7 +595,6 @@
         }
     });
 </script>
-
 
 
 
