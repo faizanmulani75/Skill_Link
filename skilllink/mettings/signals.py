@@ -40,6 +40,31 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
             body=f"You have a new request for {instance.skill.name}.",
             link="/meetings/"
         )
+        # Real-time Dashboard Update
+        from django.db import transaction
+        def send_booking_request():
+            channel_layer = get_channel_layer()
+            
+            # 1. Notify Provider (INCOMING)
+            async_to_sync(channel_layer.group_send)(
+                f"user_{instance.provider.user.id}",
+                {
+                    "type": "new_booking_request",
+                    "booking_id": instance.id,
+                    "role": "provider"
+                }
+            )
+
+            # 2. Notify Requester (OUTGOING/REQUESTED)
+            async_to_sync(channel_layer.group_send)(
+                f"user_{instance.requester.user.id}",
+                {
+                    "type": "new_booking_request",
+                    "booking_id": instance.id,
+                    "role": "requester"
+                }
+            )
+        transaction.on_commit(send_booking_request)
     else:
         # Notify requester/provider about status change
         for user_profile in [instance.requester, instance.provider]:
@@ -59,14 +84,16 @@ def broadcast_booking_update(sender, instance, created, **kwargs):
             from django.urls import reverse
             action_urls = {}
             if instance.status == 'accepted':
-                # Both can schedule, but URL is same
+                # Both can schedule
                 action_urls['schedule_url'] = reverse('schedule_meeting', args=[instance.id])
+                action_urls['chat_url'] = reverse('booking_details', args=[instance.id])
             elif instance.status == 'scheduled':
                 # Zoom Link (passed as raw link if external) and Chat
                 action_urls['start_meeting_url'] = reverse('start_meeting', args=[instance.id]) 
                 action_urls['chat_url'] = reverse('booking_details', args=[instance.id])
                 if instance.meeting_link:
-                    action_urls['join_meeting_url'] = instance.meeting_link
+                    # Note: We now route Requester via 'start_meeting' to track join
+                    action_urls['join_meeting_url'] = reverse('start_meeting', args=[instance.id])
                 # Note: meeting_link is stored on model, but we can't easily reverse it if it's external.
                 # However, start_meeting view redirects to it.
                 
@@ -121,6 +148,28 @@ def broadcast_token_update(sender, instance, **kwargs):
             "balance": instance.tokens_balance
         }
     )
+
+# ---------------- SWAP REQUEST ----------------
+from .models import SwapRequest
+
+@receiver(post_save, sender=SwapRequest)
+def broadcast_swap_update(sender, instance, created, **kwargs):
+    if created:
+        channel_layer = get_channel_layer()
+        # Notify target
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.target.user.id}",
+            {
+                "type": "new_swap_request",
+                "swap_id": instance.id
+            }
+        )
+        Notification.objects.create(
+            user=instance.target.user,
+            title="New Swap Request",
+            body=f"{instance.requester.user.username} wants to swap {instance.requester_skill.name} for {instance.target_skill.name}.",
+            link="/skills/manage-requests/"
+        )
 
 @receiver(post_save, sender=Notification)
 def broadcast_notification(sender, instance, created, **kwargs):

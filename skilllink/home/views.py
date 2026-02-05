@@ -25,26 +25,32 @@ def index(request):
     from accounts.models import Profile
     top_tutors = Profile.objects.filter(rating__gt=0).order_by('-rating')[:4]
 
-    # Reviews from Database
-    from mettings.models import Review
-    latest_reviews = Review.objects.select_related('booking__requester__user').order_by('-created_at')[:6]
+    # Reviews logic:
+    # 1. Platform Reviews (New System)
+    platform_reviews = PlatformReview.objects.select_related('user__profile').order_by('-created_at')[:6]
+    
     reviews = []
-    for r in latest_reviews:
-        reviews.append({
-            "name": r.booking.requester.user.get_full_name() or r.booking.requester.user.username,
-            "text": r.comment,
-            "profile_pic": r.booking.requester.profile_pic.url if r.booking.requester.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
-            "role": f"Learned {r.booking.skill.name}"
-        })
-
-    # Fallback to static if no reviews yet
-    # if not reviews:
-    #     reviews = [
-    #         {"name": "yash", "text": "SkillLink helped me learn Python fast!",
-    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
-    #         {"name": "Faizan", "text": "Amazing platform for peer-to-peer skill sharing.",
-    #          "profile_pic": "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png", "role": "SkillLink User"},
-    #     ]
+    
+    # If we have platform reviews, prioritize them
+    if platform_reviews.exists():
+        for r in platform_reviews:
+            reviews.append({
+                "name": r.user.get_full_name() or r.user.username,
+                "text": r.content,
+                "profile_pic": r.user.profile.profile_pic.url if hasattr(r.user, 'profile') and r.user.profile.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
+                "role": "SkillLink User (Platform Review)"
+            })
+    else:
+        # Fallback to Meeting Reviews (Old System)
+        from mettings.models import Review
+        latest_reviews = Review.objects.select_related('booking__requester__user').order_by('-created_at')[:6]
+        for r in latest_reviews:
+            reviews.append({
+                "name": r.booking.requester.user.get_full_name() or r.booking.requester.user.username,
+                "text": r.comment,
+                "profile_pic": r.booking.requester.profile_pic.url if r.booking.requester.profile_pic else "https://res.cloudinary.com/dctwxqpeo/image/upload/v1757868228/default_ehmhxs.png",
+                "role": f"Learned {r.booking.skill.name}"
+            })
 
     # Team Section
     team = [
