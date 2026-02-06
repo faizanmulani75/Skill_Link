@@ -2,16 +2,16 @@ from django.urls import path
 from .views import (
     dashboard, profile_view, profile_edit, login_page, register_page, logout_view,
     token_balance, spend_tokens, payment_success,add_tokens_view,edit_skill,delete_skill,add_skill,
-    public_profile, acknowledge_level_up
-    # verify_otp,resend_otp
+    public_profile, acknowledge_level_up,
+    verify_otp, resend_otp
 )
 urlpatterns = [
     # Auth
     path('login/', login_page, name='login'),
     path('register/', register_page, name='register'),
     path('logout/', logout_view, name='logout'),
-    # path('verify-otp/', verify_otp, name='verify_otp'),
-    # path('resend-otp/', resend_otp, name='resend_otp'),
+    path('verify-otp/', verify_otp, name='verify_otp'),
+    path('resend-otp/', resend_otp, name='resend_otp'),
 
     # Profile
     path('profile/', profile_view, name='profile'),

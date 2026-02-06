@@ -29,14 +29,14 @@ from Base.EmailOTP import send_otp
 from django.template.loader import render_to_string
 from django.conf import settings
 
-# def send_otp_email(email, otp, username):
-#     send_mail(
-#         subject="Your SkillLink OTP",
-#         message=f"Your OTP is {otp}",  # plain text fallback
-#         from_email=settings.EMAIL_HOST_USER,
-#         recipient_list=[email],
-#         fail_silently=False
-#     )
+def send_otp_email(email, otp, username):
+    send_mail(
+        subject="Your SkillLink OTP",
+        message=f"Your OTP is {otp}",  # plain text fallback
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email],
+        fail_silently=False
+    )
 
 # ---------------- LOGIN ----------------
 
@@ -126,16 +126,23 @@ def register_page(request):
             messages.error(request, "Email already registered")
             return redirect("register")
 
-        # ✅ Create user
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password1
-        )
+        # ✅ Generate OTP
+        try:
+            otp = send_otp(email)
+        except Exception as e:
+            # Fallback for demo/dev if email fails
+            print(f"SMTP Error: {e}")
+            otp = str(random.randint(100000, 999999))
+            print(f"🔥 DEBUG MODE: Generated OTP for {email} is {otp}")
 
-        # ✅ Profile auto-created by signal
-        messages.success(request, "Registration successful! Please login.")
-        return redirect("login")
+        # ✅ Store in session
+        request.session["reg_username"] = username
+        request.session["reg_email"] = email
+        request.session["reg_password"] = password1
+        request.session["reg_otp"] = otp
+
+        messages.info(request, "OTP sent to your email. Please verify.")
+        return redirect("verify_otp")
 
     return render(request, "register.html")
 
@@ -160,69 +167,54 @@ def register_page(request):
 #             messages.error(request, "Email already registered")
 #             return redirect("register")
 
-#         # ✅ Generate OTP
-#         otp = send_otp(email)
-
-#         # ✅ Store in session
-#         request.session["reg_username"] = username
-#         request.session["reg_email"] = email
-#         request.session["reg_password"] = password1
-#         request.session["reg_otp"] = otp
-
-#         return redirect("verify_otp")
-
-#     return render(request, "register.html")
-
 # ---------------- VERIFY OTP ----------------
-# def verify_otp(request):
-#     if request.method == "POST":
-#         entered_otp = request.POST.get("otp")
-#         session_otp = request.session.get("reg_otp")
+def verify_otp(request):
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
+        session_otp = request.session.get("reg_otp")
 
-#         if entered_otp == session_otp:
-#             # ✅ create user
-#             username = request.session["reg_username"]
-#             email = request.session["reg_email"]
-#             password = request.session["reg_password"]
+        if entered_otp == session_otp:
+            # ✅ create user
+            username = request.session["reg_username"]
+            email = request.session["reg_email"]
+            password = request.session["reg_password"]
 
-#             user = User.objects.create_user(username=username, email=email, password=password)
-#             login(request, user)
+            user = User.objects.create_user(username=username, email=email, password=password)
+            login(request, user)
 
-#             # ✅ clear session data
-#             for key in ["reg_username", "reg_email", "reg_password", "reg_otp"]:
-#                 request.session.pop(key, None)
+            # ✅ clear session data
+            for key in ["reg_username", "reg_email", "reg_password", "reg_otp"]:
+                request.session.pop(key, None)
 
-#             messages.success(request, "Registration complete!")
-#             return redirect("home")
+            messages.success(request, "Registration complete!")
+            return redirect("dashboard")
 
-#         else:
-#             messages.error(request, "Incorrect OTP")
-#             return redirect("verify_otp")
+        else:
+            messages.error(request, "Incorrect OTP")
+            return redirect("verify_otp")
 
-#     return render(request, "verify_otp.html")
+    return render(request, "verify_otp.html")
 
 
 # ---------------- RESEND OTP ----------------
-# @require_POST
-# def resend_otp(request):
-#     temp_user = request.session.get("temp_user")
-#     if not temp_user:
-#         messages.error(request, "Session expired. Please register again.")
-#         return redirect("register")
+@require_POST
+def resend_otp(request):
+    email = request.session.get("reg_email")
+    username = request.session.get("reg_username")
+    
+    if not email:
+        return JsonResponse({"success": False, "message": "Session expired"}, status=400)
 
-#     # Generate new OTP
-#     otp = str(random.randint(100000, 999999))
-#     temp_user["otp"] = otp
-#     request.session["temp_user"] = temp_user  # update session
+    # Generate new OTP
+    otp = str(random.randint(100000, 999999))
+    request.session["reg_otp"] = otp
 
-#     try:
-#         send_otp_email(temp_user["email"], otp, temp_user["username"])
-#         messages.success(request, "OTP resent successfully. Please check your email.")
-#         return redirect("verify_otp")
-#     except Exception as e:
-#         print("Resend OTP failed:", e)
-#         messages.error(request, "Failed to resend OTP. Try again.")
-#         return redirect("verify_otp")
+    try:
+        send_otp_email(email, otp, username)
+        return JsonResponse({"success": True, "message": "OTP resent successfully"})
+    except Exception as e:
+        print("Resend OTP failed:", e)
+        return JsonResponse({"success": False, "message": "Failed to resend OTP"}, status=500)
 
 
 

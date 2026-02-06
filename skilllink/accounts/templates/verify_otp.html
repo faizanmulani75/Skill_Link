@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Verify OTP - SkillLink{% endblock %}
+{% load static %}
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-center vh-100">
-  <div class="card otp-card shadow-lg p-4 animate__animated animate__fadeIn" 
-       style="max-width: 420px; width: 100%; border: 2px solid #f6d365; background: linear-gradient(135deg, #fffdf5, #fef8e7);">
-    
+  <div class="card otp-card shadow-lg p-4 animate__animated animate__fadeIn" style="max-width: 420px; width: 100%;">
+
     <!-- Header -->
     <div class="text-center mb-3">
-      <img src="{% static 'images/logo.png' %}" alt="SkillLink Logo" width="80" class="mb-2">
+      <!-- <img src="{% static 'images/logo.png' %}" alt="SkillLink Logo" width="80" class="mb-2"> -->
       <h3 class="fw-bold text-dark">OTP Verification</h3>
       <p class="text-muted small">Enter the OTP sent to <strong>{{ email }}</strong></p>
     </div>
@@ -17,20 +17,19 @@
     <form method="POST" id="otpForm" class="animate__animated animate__fadeInUp">
       {% csrf_token %}
       <div class="mb-3">
-        <input type="text" name="otp" maxlength="6" 
-               class="form-control text-center fw-bold fs-5 otp-input" 
-               placeholder="Enter OTP" required>
+        <input type="text" name="otp" maxlength="6" class="form-control text-center fw-bold fs-5 otp-input"
+          placeholder="Enter OTP" required>
       </div>
-      <button type="submit" 
-              class="btn btn-warning w-100 fw-bold shadow-sm hover-scale">
+      <button type="submit" class="btn btn-warning w-100 fw-bold shadow-sm hover-scale">
         Verify OTP
       </button>
     </form>
 
     <!-- Resend -->
-    <p class="text-center mt-3 mb-1">
-      Didn’t receive OTP? 
-      <span id="resendOtp" class="fw-bold text-primary cursor-pointer hover-underline">Resend</span>
+    <p class="text-center mt-3 mb-1 fw-medium otp-text">
+      Didn’t receive OTP?
+      <span id="resendOtp"
+        class="fw-bold text-warning1 text-decoration-underline cursor-pointer hover-scale d-inline-block ms-1">Resend</span>
     </p>
 
     <!-- Timer -->
@@ -42,48 +41,99 @@
 
 <!-- Styles -->
 <style>
-body {
-  background: linear-gradient(135deg, #fdfbfb, #ebedee);
-  font-family: 'Poppins', sans-serif;
-}
+  body {
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    font-family: 'Poppins', sans-serif;
+  }
 
-.otp-card {
-  border-radius: 20px;
-  transition: transform 0.3s ease;
-}
+  /* Dark Mode Overrides */
+  body.dark-mode {
+    background: linear-gradient(135deg, #121212, #0d0d0d) !important;
+    color: #e0e0e0;
+  }
 
-.otp-card:hover {
-  transform: translateY(-5px);
-}
+  .text-warning1 {
+    color: #000 !important;
+  }
 
-.otp-input {
-  letter-spacing: 0.4rem;
-  border: 2px solid #FFD700;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-}
+  body.dark-mode .text-warning1 {
+    color: #f1c40f !important;
+  }
 
-.otp-input:focus {
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-  border-color: #f1c40f;
-}
+  .otp-card {
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+    background: linear-gradient(135deg, #fffdf5, #fef8e7);
+    border: 2px solid #f6d365;
+  }
 
-.hover-scale {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
+  body.dark-mode .otp-card {
+    background: #1e1e1e !important;
+    border-color: #333 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  }
 
-.hover-scale:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
+  body.dark-mode .text-dark {
+    color: #fff !important;
+  }
 
-.hover-underline:hover {
-  text-decoration: underline;
-}
+  body.dark-mode .text-muted {
+    color: #aaa !important;
+  }
 
-.animate__animated {
-  animation-duration: 0.8s;
-}
+  .otp-text {
+    color: #333;
+  }
+
+  body.dark-mode .otp-text {
+    color: #ccc !important;
+  }
+
+  .otp-input {
+    letter-spacing: 0.4rem;
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    color: #000;
+  }
+
+  body.dark-mode .otp-input {
+    background-color: #2b2b2b;
+    border-color: #555;
+    color: #fff;
+  }
+
+  .otp-input:focus {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    border-color: #f1c40f;
+  }
+
+  body.dark-mode .otp-input:focus {
+    border-color: #f9b934;
+    box-shadow: 0 0 10px rgba(249, 185, 52, 0.2);
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .hover-underline:hover {
+    text-decoration: underline;
+  }
+
+  .animate__animated {
+    animation-duration: 0.8s;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
 </style>
 
 <!-- Script -->
@@ -124,21 +174,21 @@ body {
   const csrftoken = getCookie('csrftoken');
 
   // Resend OTP
-  document.getElementById('resendOtp').addEventListener('click', function(){
+  document.getElementById('resendOtp').addEventListener('click', function () {
     fetch("{% url 'resend_otp' %}", {
       method: 'POST',
       headers: { 'X-CSRFToken': csrftoken }
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('✅ OTP resent! Check your email.');
-        time = 120;
-        document.querySelector('#otpForm button').disabled = false;
-      } else {
-        alert('❌ Error resending OTP.');
-      }
-    });
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✅ OTP resent! Check your email.');
+          time = 120;
+          document.querySelector('#otpForm button').disabled = false;
+        } else {
+          alert('❌ Error resending OTP.');
+        }
+      });
   });
 </script>
 {% endblock %}
