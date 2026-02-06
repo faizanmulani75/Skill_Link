@@ -26,7 +26,7 @@ MarkupSafe==3.0.3
 msgpack==1.1.2
 packaging==26.0
 pillow==12.1.0
-psycopg2-binary==2.9.11
+pillow==12.1.0
 py-ubjson==0.16.1
 pyasn1==0.6.2
 pyasn1_modules==0.4.2
@@ -46,5 +46,8 @@ ujson==5.11.0
 urllib3==2.6.3
 whitenoise==6.11.0
 zope.interface==8.2
+uvicorn>=0.30.0
+gunicorn==24.1.1
+psycopg[binary,pool]
 djangorestframework
 django-cors-headers
