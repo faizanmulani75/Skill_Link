@@ -7,7 +7,7 @@ primary_region = "sin"
 
 [env]
   PORT = "8000"
-  PYTHON_VERSION = "3.11.0"
+  PYTHON_VERSION = "3.12.0"
   WEB_CONCURRENCY = "4"
   DJANGO_SETTINGS_MODULE = "skilllink.settings"
 
