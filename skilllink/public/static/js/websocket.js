@@ -35,13 +35,8 @@ class WebSocketManager {
              return;
         }
 
-        let wsUrl;
-        if (window.location.hostname === 'skill-link-ptzd.onrender.com') {
-            wsUrl = 'wss://skill-link-ptzd.onrender.com/ws/user/';
-        } else {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            wsUrl = `${protocol}//${window.location.host}/ws/user/`;
-        }
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/user/`;
 
         console.log(`Connecting to WebSocket at ${wsUrl}`);
         this.socket = new WebSocket(wsUrl);

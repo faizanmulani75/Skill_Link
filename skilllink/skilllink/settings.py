@@ -52,6 +52,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
     "skill-link-ptzd.onrender.com",
+    "skill-link-roan.vercel.app",
 ]
 
 
@@ -59,19 +60,27 @@ ALLOWED_HOSTS = [
 
 # Security settings - disabled for local development
 
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SECURE_BROWSER_XSS_FILTER = False
-SECURE_CONTENT_TYPE_NOSNIFF = False
-SECURE_PROXY_SSL_HEADER = None
+# SECURE_SSL_REDIRECT = False
+# SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
+# SECURE_BROWSER_XSS_FILTER = False
+# SECURE_CONTENT_TYPE_NOSNIFF = False
+# SECURE_PROXY_SSL_HEADER = None
 
-# Render Security Configuration
-if config('RENDER', default=False, cast=bool):
+# Fly.io Security Configuration
+if config('FLY_APP_NAME', default=None):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
+    csrftrum = f"https://{config('FLY_APP_NAME')}.fly.dev"
+    CSRF_TRUSTED_ORIGINS = [csrftrum]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+# Render Security Configuration
+# if config('RENDER', default=False, cast=bool):
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
 
 
 
