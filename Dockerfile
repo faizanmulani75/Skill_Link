@@ -6,7 +6,7 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Set work directory
+# Set work directory to root first to install requirements
 WORKDIR /app
 
 # Install system dependencies
@@ -22,11 +22,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Collect static files
-# RUN python manage.py collectstatic --noinput
-
-# Make the start script executable (if we were using one, but we'll use CMD for simplicity or fly.toml release command)
-# RUN chmod +x /app/build.sh
+# CHANGE WORKDIR TO DJANGO PROJECT ROOT
+WORKDIR /app/skilllink
 
 # Expose port 8000
 EXPOSE 8000
