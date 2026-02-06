@@ -96,7 +96,7 @@ if config('RAILWAY_ENVIRONMENT', default=None):
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -148,7 +148,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'skilllink.wsgi.application'
-# ASGI_APPLICATION = "skilllink.asgi.application"
+ASGI_APPLICATION = "skilllink.asgi.application"
 
 # Channels Configuration
 # Default to InMemory in dev if no REDIS_HOST is set, but keeping flexibility
