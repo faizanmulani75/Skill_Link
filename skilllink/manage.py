@@ -15,6 +15,17 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+    
+    # Default to 0.0.0.0:8000 if runserver is called without args
+    if len(sys.argv) > 1 and sys.argv[1] == 'runserver':
+        addr_port_specified = False
+        for arg in sys.argv[2:]:
+            if not arg.startswith('-'):
+                addr_port_specified = True
+                break
+        if not addr_port_specified:
+            sys.argv.append('0.0.0.0:8000')
+
     execute_from_command_line(sys.argv)
 
 
