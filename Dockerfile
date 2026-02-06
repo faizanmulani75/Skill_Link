@@ -28,5 +28,6 @@ WORKDIR /app/skilllink
 # Expose port 8000
 EXPOSE 8000
 
+
 # Start daphne
-CMD daphne -b 0.0.0.0 -p ${PORT:-8000} skilllink.asgi:application
+CMD ["sh", "-c", "daphne -b 0.0.0.0 -p ${PORT:-8000} skilllink.asgi:application"]

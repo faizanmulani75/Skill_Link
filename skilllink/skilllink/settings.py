@@ -52,7 +52,8 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
     "skill-link-ptzd.onrender.com",
-    "skill-link-production-f36b.up.railway.app"
+    "skill-link-production-f36b.up.railway.app",
+    "*"
 ]
 
 
