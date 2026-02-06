@@ -78,8 +78,8 @@ ALLOWED_HOSTS = [
 # Railway Security Configuration
 if config('RAILWAY_ENVIRONMENT', default=None):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    if config('skill-link-production-f36b.up.railway.app', default=None):
-        CSRF_TRUSTED_ORIGINS = [f"https://{config('skill-link-production-f36b.up.railway.app')}"]
+    if config('RAILWAY_PUBLIC_DOMAIN', default=None):
+        CSRF_TRUSTED_ORIGINS = [f"https://{config('RAILWAY_PUBLIC_DOMAIN')}"]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
