@@ -10,9 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='profile',
-            name='verified',
-            field=models.BooleanField(default=True),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='profile',
+                    name='verified',
+                    field=models.BooleanField(default=True),
+                ),
+            ],
+            database_operations=[],
         ),
     ]
