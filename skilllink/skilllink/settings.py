@@ -52,6 +52,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
     "skill-link-ptzd.onrender.com",
+    "skill-link-production-f36b.up.railway.app"
 ]
 
 
@@ -67,10 +68,18 @@ ALLOWED_HOSTS = [
 # SECURE_PROXY_SSL_HEADER = None
 
 # Fly.io Security Configuration
-if config('FLY_APP_NAME', default=None):
+# if config('FLY_APP_NAME', default=None):
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     csrftrum = f"https://{config('FLY_APP_NAME')}.fly.dev"
+#     CSRF_TRUSTED_ORIGINS = [csrftrum]
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+
+# Railway Security Configuration
+if config('RAILWAY_ENVIRONMENT', default=None):
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    csrftrum = f"https://{config('FLY_APP_NAME')}.fly.dev"
-    CSRF_TRUSTED_ORIGINS = [csrftrum]
+    if config('skill-link-production-f36b.up.railway.app', default=None):
+        CSRF_TRUSTED_ORIGINS = [f"https://{config('skill-link-production-f36b.up.railway.app')}"]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
