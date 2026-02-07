@@ -35,6 +35,13 @@ class WebSocketManager {
              return;
         }
 
+        // Check if user is logged in
+        const userId = document.body.dataset.userId;
+        if (!userId || userId === "None" || userId === "") {
+            console.log('User not logged in. Skipping WebSocket connection.');
+            return;
+        }
+
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/user/`;
 

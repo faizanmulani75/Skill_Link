@@ -326,7 +326,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body>
+<body data-user-id="{{ user.id|default:'' }}">
   <!-- 🚀 Rockets Loading
     <div id="loadingOverlay">
       <h1 class="fw-bold">SkillLink</h1>
