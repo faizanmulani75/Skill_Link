@@ -18,8 +18,31 @@ import cloudinary.uploader
 import cloudinary.api
 import dj_database_url
 import os
+import socket
 
+# -----------------------------------------------------------------------------
+# IPv4 CONNECTION PATCH
+# Fixing [Errno 101] Network is unreachable on Railway (which prefers IPv6 but blocks it)
+# -----------------------------------------------------------------------------
+try:
+    # Save original getaddrinfo just in case
+    _original_getaddrinfo = socket.getaddrinfo
 
+    def new_getaddrinfo(*args, **kwargs):
+        # Force family to AF_INET (IPv4)
+        if args and args[0] in ['smtp.gmail.com', 'www.googleapis.com', 'accounts.google.com']:
+            # Only force for Google services to be safe, or everywhere?
+            # Let's force everywhere to be safe on this host.
+            responses = _original_getaddrinfo(*args, **kwargs)
+            return [r for r in responses if r[0] == socket.AF_INET]
+            
+        return _original_getaddrinfo(*args, **kwargs)
+
+    # Apply the patch GLOBALLY
+    socket.getaddrinfo = new_getaddrinfo
+    print("✅ Applied IPv4 Network Patch for SMTP")
+except Exception as e:
+    print(f"⚠️ Failed to apply IPv4 patch: {e}")
 
 # DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
