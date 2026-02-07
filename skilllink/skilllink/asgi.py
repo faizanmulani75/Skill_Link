@@ -26,8 +26,8 @@ class DebugMiddleware:
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": DebugMiddleware(
-        AuthMiddlewareStack(
+    "websocket": AuthMiddlewareStack(
+        DebugMiddleware(
             URLRouter(
                 mettings.routing.websocket_urlpatterns
             )
