@@ -105,6 +105,7 @@ def send_otp(email):
     </html>
     """
 
+    print(f"DEBUG EmailOTP: Preparing to send email to {to}")
     email_message = EmailMultiAlternatives(
         subject,
         text_content,
@@ -112,7 +113,12 @@ def send_otp(email):
         to,
     )
     email_message.attach_alternative(html_content, "text/html")
-    email_message.send(fail_silently=False)
+    try:
+        email_message.send(fail_silently=False)
+        print("DEBUG EmailOTP: Email sent successfully")
+    except Exception as e:
+        print(f"DEBUG EmailOTP: Send failed with error: {e}")
+        raise e
 
     return otp
 

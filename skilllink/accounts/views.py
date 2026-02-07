@@ -128,10 +128,13 @@ def register_page(request):
 
         # ✅ Generate OTP
         try:
+            print(f"DEBUG: Calling send_otp for {email}")
             otp = send_otp(email)
+            print(f"DEBUG: send_otp returned {otp}")
         except Exception as e:
             # Fallback for demo/dev if email fails
             print(f"SMTP Error: {e}")
+            messages.warning(request, f"Email failed (Debug): {e}") # Show error to user
             otp = str(random.randint(100000, 999999))
             print(f"🔥 DEBUG MODE: Generated OTP for {email} is {otp}")
 
@@ -168,7 +171,12 @@ def register_page(request):
 #             return redirect("register")
 
 # ---------------- VERIFY OTP ----------------
+@csrf_protect
 def verify_otp(request):
+    if "reg_otp" not in request.session:
+        messages.error(request, "Session expired or invalid. Please register again.")
+        return redirect("register")
+
     if request.method == "POST":
         entered_otp = request.POST.get("otp")
         session_otp = request.session.get("reg_otp")
