@@ -21,7 +21,7 @@ import os
 
 
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+# DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 
 CLOUDINARY_URL = config('CLOUDINARY_URL')
@@ -53,7 +53,6 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "skill-link-ptzd.onrender.com",
     "skill-link-production-f36b.up.railway.app",
-    "*"
 ]
 
 
@@ -153,22 +152,31 @@ ASGI_APPLICATION = "skilllink.asgi.application"
 # Channels Configuration
 # Default to InMemory in dev if no REDIS_HOST is set, but keeping flexibility
 # For strict local dev without Redis:
-if config('REDIS_URL', default=None):
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [config('REDIS_URL')],
-            },
-        },
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
+# if config('REDIS_URL', default=None):
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels_redis.core.RedisChannelLayer",
+#             "CONFIG": {
+#                 "hosts": [config('REDIS_URL')],
+#             },
+#         },
+#     }
+# else:
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels.layers.InMemoryChannelLayer"
+#         }
+#     }
 
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [config("REDIS_URL")],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -225,7 +233,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "public/static"]
+MEDIA_ROOT = BASE_DIR / "public/media"
+
 
 
 
@@ -272,13 +284,13 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='bckqhhyppwpyzagb')
 # CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
 # SECURE_HSTS_SECONDS = 31536000
 
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
+# if not DEBUG:
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+#     SECURE_HSTS_SECONDS = 31536000
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     CSRF_TRUSTED_ORIGINS = ["https://skill-link-ptzd.onrender.com"]
 
 
 # Development settings
