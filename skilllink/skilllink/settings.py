@@ -345,3 +345,8 @@ cloudinary.config(
 )
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+# Brevo Configuration
+BREVO_API_KEY = config('BREVO_API_KEY', default=None)
+BREVO_SENDER_EMAIL = config('BREVO_SENDER_EMAIL', default='skilllinproj@gmail.com')
+BREVO_SENDER_NAME = config('BREVO_SENDER_NAME', default='SkillLink')
