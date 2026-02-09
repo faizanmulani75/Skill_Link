@@ -16,7 +16,7 @@ def create_or_update_profile(sender, instance, created, **kwargs):
     if created:
         # create profile with defaults (won't fail if profile_pic is nullable)
         profile = Profile.objects.create(user=instance, has_reviewed_platform=False)
-        profile.add_tokens(100, "Welcome Bonus! 🎉", "earned")
+        profile.add_tokens(100, "Welcome Bonus! 🎉", "bonus")
     else:
         # Only save profile if it exists
         try:
@@ -24,7 +24,7 @@ def create_or_update_profile(sender, instance, created, **kwargs):
         except Profile.DoesNotExist:
             # create one if missing (covers edge cases)
             profile = Profile.objects.create(user=instance, has_reviewed_platform=False)
-            profile.add_tokens(100, "Welcome Bonus! 🎉", "earned")
+            profile.add_tokens(100, "Welcome Bonus! 🎉", "bonus")
         else:
             # don't force-save fields that might cause DB constraints,
             # but keep it in case you rely on post-save hooks in Profile

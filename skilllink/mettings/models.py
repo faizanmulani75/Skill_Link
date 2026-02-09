@@ -23,6 +23,7 @@ class Booking(models.Model):
     tokens_deducted = models.BooleanField(default=False)
     tokens_scheduled_given = models.BooleanField(default=False)
     tokens_completed_given = models.BooleanField(default=False)
+    tokens_refunded = models.BooleanField(default=False) 
 
     proposed_time = models.DateTimeField(null=True, blank=True)
     meeting_link = models.URLField(null=True, blank=True)

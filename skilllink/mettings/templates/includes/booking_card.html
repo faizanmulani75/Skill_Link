@@ -2,7 +2,7 @@
     <div class="card-body">
         <p><strong>Skill:</strong> {{ booking.skill.name }}</p>
         <p><strong>Status:</strong> <span
-                class="badge text-dark status-badge {% if booking.status == 'accepted' %}bg-success{% elif booking.status == 'rejected' or booking.status == 'cancelled' or booking.status == 'canceled' %}bg-danger{% elif booking.status == 'pending' %}bg-warning{% elif booking.status == 'scheduled' %}bg-primary{% elif booking.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %}">{{ booking.status|capfirst }}</span></p>
+                class="badge text-dark status-badge {% if booking.status == 'accepted' %}bg-success{% elif booking.status == 'rejected' or booking.status == 'cancelled' %}bg-danger{% elif booking.status == 'pending' %}bg-warning{% elif booking.status == 'scheduled' %}bg-primary{% elif booking.status == 'completed' %}bg-success{% else %}bg-secondary{% endif %}">{{ booking.status|capfirst }}</span></p>
 
         {% if booking.provider.user == user %}
         <p><strong>Requester:</strong> {{ booking.requester.user.get_full_name|default:booking.requester.user.username }}</p>
@@ -22,14 +22,15 @@
             {% if booking.status == 'pending' %}
             {% if booking.provider.user == user %}
             {# Provider Actions #}
-            <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-success fw-bold shadow-sm">Accept &
+            <a href="{% url 'schedule_meeting' booking.id %}" class="btn btn-success fw-bold shadow-sm"
+                onclick="this.classList.add('disabled');">Accept &
                 Schedule</a>
-            <a href="{% url 'booking_update_status' booking.id 'reject' %}"
-                class="btn btn-danger fw-bold shadow-sm">Reject</a>
+            <a href="{% url 'booking_update_status' booking.id 'reject' %}" class="btn btn-danger fw-bold shadow-sm"
+                onclick="this.classList.add('disabled');">Reject</a>
             {% else %}
             {# Requester Actions #}
-            <a href="{% url 'booking_update_status' booking.id 'cancel' %}"
-                class="btn btn-warning fw-bold shadow-sm">Cancel</a>
+            <a href="{% url 'booking_update_status' booking.id 'cancel' %}" class="btn btn-warning fw-bold shadow-sm"
+                onclick="this.classList.add('disabled');">Cancel</a>
             {% endif %}
 
             {% elif booking.status == 'accepted' %}
@@ -57,7 +58,7 @@
             {% elif booking.status == 'rejected' %}
             <span class="text-danger fw-bold">Booking Rejected</span>
 
-            {% elif booking.status == 'canceled' or booking.status == 'cancelled' %}
+            {% elif booking.status == 'cancelled' %}
             <span class="text-warning fw-bold">Booking Cancelled</span>
             {% endif %}
         </div>

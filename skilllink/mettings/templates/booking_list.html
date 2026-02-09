@@ -391,7 +391,7 @@
 
             badge.className = 'badge text-dark status-badge';
             if (data.new_status === 'accepted') badge.classList.add('bg-success');
-            else if (data.new_status === 'rejected' || data.new_status === 'cancelled' || data.new_status === 'canceled') badge.classList.add('bg-danger');
+            else if (data.new_status === 'rejected' || data.new_status === 'cancelled') badge.classList.add('bg-danger');
             else if (data.new_status === 'pending') badge.classList.add('bg-warning');
             else if (data.new_status === 'scheduled') badge.classList.add('bg-primary');
             else badge.classList.add('bg-secondary');

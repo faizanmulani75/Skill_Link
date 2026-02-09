@@ -5,9 +5,10 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <script>
     (function () {
       const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -53,7 +54,11 @@
 
 
     * {
-      font-family: "Poppins", sans-serif !important;
+      font-family: "PoppinsLocal", sans-serif !important;
+      font-weight: 500;
+      /* ✅ Refined Medium Base (Looks Premium) */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     h1,
@@ -62,8 +67,30 @@
     h4,
     h5,
     h6 {
-      font-weight: 600;
-      /* Ensure headings are bold */
+      font-weight: 700 !important;
+      /* ✅ Distinct Bold Headings */
+      letter-spacing: -0.02em;
+    }
+
+    /* 🧱 Custom Weight Utilities */
+    .fw-medium {
+      font-weight: 500 !important;
+    }
+
+    .fw-semibold {
+      font-weight: 600 !important;
+    }
+
+    .fw-bold {
+      font-weight: 700 !important;
+    }
+
+    .fw-extrabold {
+      font-weight: 800 !important;
+    }
+
+    .fw-black {
+      font-weight: 900 !important;
     }
 
 
@@ -321,7 +348,7 @@
     }
   </style>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" /> -->
 
   {% block extra_head %}{% endblock %}
 </head>
@@ -341,6 +368,7 @@
       <a class="navbar-brand fw-bold fs-3 text-warning" href="{% url 'index' %}">SkillLink</a>
 
       <div class="d-flex align-items-center order-lg-3 gap-2">
+        {% if user.is_authenticated %}
         <!-- Notification Bell -->
         <div class="dropdown">
           <button class="btn btn-warning rounded-circle position-relative" type="button" id="notificationBell"
@@ -358,16 +386,20 @@
               <h6 class="mb-0 fw-bold">Notifications</h6>
               <button class="btn btn-sm text-primary p-0 fw-semibold" id="mark-all-read">Mark all as read</button>
             </li>
-            <div id="notification-list">
-              <!-- Dynamically populated -->
-              <li class="p-4 text-center text-muted">
+            <div id="notification-list" class="p-0">
+              <!-- Empty state -->
+              <div class="p-5 text-center text-muted">
                 <i class="bi bi-bell-slash d-block fs-2 mb-2"></i>
-                No notifications yet
-              </li>
+                <p class="small mb-0">No new notifications</p>
+              </div>
             </div>
+            <li class="p-2 border-top text-center bg-white" id="view-more-container" style="display: none;">
+              <a href="#" class="btn btn-sm btn-link text-warning fw-bold text-decoration-none"
+                id="view-more-notifications">View More</a>
+            </li>
           </ul>
         </div>
-
+        {% endif %}
         <!-- 🌗 Dark Mode Toggle -->
         <button id="dark-mode-toggle" class="btn btn-warning btn-outline-warning rounded-circle">
           <i class="bi bi-moon"></i>
@@ -515,7 +547,7 @@
       color: var(--text-color);
       transition: background-color 0.3s ease, color 0.3s ease;
       overflow-x: hidden;
-      font-family: "Poppins", sans-serif !important;
+      font-family: "PoppinsLocal", sans-serif !important;
     }
 
     /* 🧭 Navbar */
@@ -651,7 +683,7 @@
     /* Links visible by default */
     .nav-link {
       position: relative;
-      font-weight: 500;
+      font-weight: 700;
       color: #000000ff !important;
       /* ✅ Always visible */
       transition: color 0.3s ease;
@@ -663,6 +695,7 @@
     .nav-link.show {
       color: #e20505ff !important;
     }
+
 
     /* Hover effect */
     .nav-link:hover {
@@ -730,7 +763,7 @@
   <footer class="footer mt-auto py-3 text-center">
     <div class="container">
       <p class="mb-0 fw-semibold">
-        © {{ current_year|default:2025 }}
+        © {{ current_year|default:2026 }}
         <span class="brand">SkillLink</span> — Connecting Skills, Empowering
         Students
         <!-- <span class="ms-2 badge bg-warning text-dark opacity-75" style="font-size: 0.7rem;">Timezone: {{ TIME_ZONE }}</span> -->
@@ -749,7 +782,7 @@
       left: 0;
       width: 100%;
       color: #222;
-      font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-family: "PoppinsLocal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       z-index: 1000;

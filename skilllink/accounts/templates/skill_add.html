@@ -17,7 +17,7 @@
       <div class="mb-3">
         <label for="skill_name" class="form-label fw-semibold">Skill Name</label>
         <input type="text" class="form-control form-control-theme" id="skill_name" name="skill_name"
-          placeholder="e.g., Web Development, Guitar" required>
+          placeholder="e.g., Web Development, Guitar" maxlength="100" required>
       </div>
 
       <!-- Skill Icon -->
@@ -52,14 +52,16 @@
       <div class="mb-3">
         <label for="token_cost" class="form-label fw-semibold">Token Cost</label>
         <input type="number" class="form-control form-control-theme" id="token_cost" name="token_cost" min="0"
-          value="0">
+          max="{{ max_tokens|default:100 }}" value="0">
+        <div class="form-text text-muted small">Max tokens allowed for your level (Level {{ profile.calculate_level }}):
+          <b>{{ max_tokens|default:100 }} tokens</b></div>
       </div>
 
       <!-- Personal Description -->
       <div class="mb-3">
         <label for="personal_description" class="form-label fw-semibold">Personal Description</label>
         <textarea class="form-control form-control-theme" id="personal_description" name="personal_description" rows="3"
-          placeholder="Describe your skill and experience..."></textarea>
+          placeholder="Describe your skill and experience... (max 500 chars)" maxlength="500"></textarea>
       </div>
 
       <!-- Available for Teaching -->
@@ -92,7 +94,6 @@
 </div>
 
 <style>
-
   body {
     font-family: var(--base-font, 'Poppins', sans-serif);
   }
@@ -210,6 +211,7 @@
     background-color: #2b2b2b !important;
     border-color: #555 !important;
   }
+
   .form-check-input:checked {
     background-color: #f59e0b !important;
     border-color: #f59e0b !important;

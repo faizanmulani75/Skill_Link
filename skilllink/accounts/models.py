@@ -90,6 +90,12 @@ class Profile(models.Model):
             return 9
         else:
             return 10  # Max level
+
+    @property
+    def get_max_token_cost(self):
+        """Calculate max token cost based on Level * 10, max 100"""
+        level = self.calculate_level()
+        return min(level * 10, 100)
     
     def get_xp_for_level(self, level):
         """Get XP required to reach a specific level"""
@@ -198,6 +204,13 @@ class Profile(models.Model):
             total=models.Sum("amount")
         )["total"] or 0
 
+    @property
+    def total_bonus(self):
+        from .models import Transaction
+        return Transaction.objects.filter(user=self, transaction_type='bonus').aggregate(
+            total=models.Sum("amount")
+        )["total"] or 0
+
 
     @property
     def token_balance(self):
@@ -208,9 +221,10 @@ class Profile(models.Model):
         earned = data.get("earned", 0)
         spent = data.get("spent", 0)
         purchased = data.get("purchased", 0)
+        bonus = data.get("bonus", 0)
         refund = data.get("refund", 0)
 
-        return (purchased + earned + refund) - spent
+        return (purchased + earned + refund + bonus) - spent
 
 
 
@@ -267,6 +281,7 @@ class Transaction(models.Model):
         ('spent', 'Spent'),
         ('purchased', 'Purchased'),
         ('refund', 'Refund'),
+        ('bonus', 'Bonus'),
     ]
 
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)

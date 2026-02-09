@@ -8,7 +8,7 @@
 
   <!-- Header -->
   <h2 class="text-center fw-bold mb-4 animate__animated animate__fadeInDown page-title">
-    ✏️ Edit Profile
+    Edit Profile
   </h2>
 
   <!-- Profile Info Card -->
@@ -56,9 +56,11 @@
             <p class="text-muted mb-0">{{ skill.personal_description|default:"No description" }}</p>
           </div>
           <div class="btn-group btn-group-sm">
-            <a href="{% url 'edit_skill' skill.id %}" class="btn btn-outline-primary shadow-sm">Edit</a>
-            <a href="{% url 'delete_skill' skill.id %}" class="btn btn-outline-danger shadow-sm"
-              onclick="return confirm('Are you sure?');">Delete</a>
+            <a href="{% url 'edit_skill' skill.id %}" class="btn btn-outline-primary shadow-sm"
+              style="border-radius: 8px 0 0 8px;">Edit</a>
+            <button class="btn btn-outline-danger shadow-sm delete-skill-btn"
+              data-url="{% url 'delete_skill' skill.id %}" data-name="{{ skill.skill.name }}"
+              style="border-radius: 0 8px 8px 0;">Delete</button>
           </div>
         </li>
         {% endfor %}
@@ -74,7 +76,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <style>
-
   .edit-profile-card,
   .skill-list-card {
     border-radius: 1.5rem;
@@ -272,6 +273,30 @@
     };
     window.addEventListener("scroll", revealOnScroll);
     revealOnScroll();
+
+    // SweetAlert Deletion
+    document.querySelectorAll('.delete-skill-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const url = this.getAttribute('data-url');
+        const name = this.getAttribute('data-name');
+
+        Swal.fire({
+          title: 'Delete Skill?',
+          text: `Are you sure you want to remove ${name}?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Yes, delete it!',
+          background: document.body.classList.contains('dark-mode') ? '#1A1A1A' : '#fff',
+          color: document.body.classList.contains('dark-mode') ? '#f1f5f9' : '#111'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = url;
+          }
+        });
+      });
+    });
   });
 </script>
 {% endblock %}

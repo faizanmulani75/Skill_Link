@@ -16,7 +16,7 @@
         <div class="mb-3">
           <label for="skill_name" class="form-label fw-semibold">Skill Name</label>
           <input type="text" class="form-control" id="skill_name" name="skill_name"
-            value="{{ skill_instance.skill.name }}" placeholder="Enter skill name" required>
+            value="{{ skill_instance.skill.name }}" placeholder="Enter skill name" maxlength="100" required>
         </div>
 
         <!-- Experience Level -->
@@ -42,7 +42,8 @@
         <div class="mb-3">
           <label for="personal_description" class="form-label fw-semibold">Personal Description</label>
           <textarea class="form-control" id="personal_description" name="personal_description" rows="3"
-            placeholder="Describe your experience">{{ skill_instance.personal_description }}</textarea>
+            placeholder="Describe your experience (max 500 chars)"
+            maxlength="500">{{ skill_instance.personal_description }}</textarea>
         </div>
 
         <!-- Available for Teaching -->
@@ -58,7 +59,10 @@
         <div class="mb-3">
           <label for="token_cost" class="form-label fw-semibold">Token Cost</label>
           <input type="number" class="form-control" id="token_cost" name="token_cost"
-            value="{{ skill_instance.token_cost }}" placeholder="Enter token cost">
+            value="{{ skill_instance.token_cost }}" placeholder="Enter token cost" min="0"
+            max="{{ skill_instance.profile.get_max_token_cost }}">
+          <div class="form-text text-muted small">Max tokens allowed for your level (Level {{ skill_instance.profile.calculate_level }}): <b>{{ skill_instance.profile.get_max_token_cost }} tokens</b>
+          </div>
         </div>
 
         <!-- Desired Exchange Skills -->
@@ -136,7 +140,6 @@
 </div>
 
 <style>
-
   .edit-skill-card {
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -271,7 +274,7 @@
     }
   }
 
- 
+
   .form-check,
   .form-check-input,
   .form-check-label {

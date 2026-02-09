@@ -34,7 +34,7 @@
 
     <!-- Timer -->
     <p class="text-center text-muted small">
-      OTP expires in <span id="timer">02:00</span>
+      OTP expires in <span id="timer" class="fw-bold">02:00</span>
     </p>
   </div>
 </div>
@@ -138,22 +138,49 @@
 
 <!-- Script -->
 <script>
-  // Timer
-  let time = 120;
-  const timerEl = document.getElementById('timer');
+  // OTP Timer with persistence
+  const backendRemaining = {{ remaining_seconds|default:600 }};
+  let storedEndTime = sessionStorage.getItem('otpExpiry');
+  let endTime;
 
-  const countdown = setInterval(() => {
-    const minutes = String(Math.floor(time / 60)).padStart(2, '0');
-    const seconds = String(time % 60).padStart(2, '0');
-    timerEl.textContent = `${minutes}:${seconds}`;
-    time--;
+  if (storedEndTime) {
+    endTime = parseInt(storedEndTime);
 
-    if (time < 0) {
-      clearInterval(countdown);
-      timerEl.textContent = "Expired!";
-      document.querySelector('#otpForm button').disabled = true;
+    let currentRemaining = Math.floor((endTime - Date.now()) / 1000);
+
+    if (Math.abs(currentRemaining - backendRemaining) > 10 || currentRemaining < 0) {
+      endTime = Date.now() + (backendRemaining * 1000);
+      sessionStorage.setItem('otpExpiry', endTime);
     }
-  }, 1000);
+  } else {
+    endTime = Date.now() + (backendRemaining * 1000);
+    sessionStorage.setItem('otpExpiry', endTime);
+  }
+
+  function updateTimer() {
+    let now = Date.now();
+    let timeLeft = Math.floor((endTime - now) / 1000);
+    const timerEl = document.getElementById('timer');
+    const verifyBtn = document.querySelector('#otpForm button');
+
+    if (timeLeft <= 0) {
+      if (typeof countdown !== 'undefined') clearInterval(countdown);
+      timerEl.textContent = "Expired!";
+      timerEl.classList.add('text-danger');
+      if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.style.opacity = '0.5';
+      }
+      return;
+    }
+
+    const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    const seconds = String(timeLeft % 60).padStart(2, '0');
+    timerEl.textContent = `${minutes}:${seconds}`;
+  }
+
+  let countdown = setInterval(updateTimer, 1000);
+  updateTimer();
 
   // Get CSRF token
   function getCookie(name) {
@@ -175,6 +202,10 @@
 
   // Resend OTP
   document.getElementById('resendOtp').addEventListener('click', function () {
+    const resendBtn = this;
+    resendBtn.style.pointerEvents = 'none';
+    resendBtn.style.opacity = '0.5';
+
     fetch("{% url 'resend_otp' %}", {
       method: 'POST',
       headers: { 'X-CSRFToken': csrftoken }
@@ -183,12 +214,40 @@
       .then(data => {
         if (data.success) {
           alert('✅ OTP resent! Check your email.');
-          time = 120;
-          document.querySelector('#otpForm button').disabled = false;
+          // Reset Timer
+          endTime = Date.now() + (600 * 1000); // 10 minutes
+          sessionStorage.setItem('otpExpiry', endTime);
+
+          clearInterval(countdown);
+          countdown = setInterval(updateTimer, 1000);
+          updateTimer();
+
+          const verifyBtn = document.querySelector('#otpForm button');
+          if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.style.opacity = '1';
+          }
+          const timerEl = document.getElementById('timer');
+          if (timerEl) {
+            timerEl.classList.remove('text-danger');
+          }
         } else {
-          alert('❌ Error resending OTP.');
+          alert('❌ Error: ' + data.message);
         }
+      })
+      .finally(() => {
+        resendBtn.style.pointerEvents = 'auto';
+        resendBtn.style.opacity = '1';
       });
   });
+
+  // Clear timer on success (handled by being redirected away, but good practice)
+  {% if messages %}
+  {% for message in messages %}
+  {% if 'success' in message.tags %}
+  sessionStorage.removeItem('otpExpiry');
+  {% endif %}
+  {% endfor %}
+  {% endif %}
 </script>
 {% endblock %}

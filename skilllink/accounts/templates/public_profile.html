@@ -153,6 +153,7 @@
                                 <i class="bi bi-pencil-square me-1"></i> Edit Skill
                             </a>
                             {% else %}
+                            {% if user.is_authenticated %}
                             <a href="{% url 'create_booking' skill.skill.id profile.id %}"
                                 class="btn btn-warning text-dark1 btn-sm w-100 fw-bold shadow-sm mb-2">
                                 Book This Skill
@@ -161,6 +162,12 @@
                                 class="btn btn-outline-primary btn-sm w-100 fw-bold shadow-sm">
                                 <i class="bi bi-arrow-left-right me-1"></i> Request Swap
                             </a>
+                            {% else %}
+                            <a href="{% url 'login' %}"
+                                class="btn btn-warning text-dark1 btn-sm w-100 fw-bold shadow-sm">
+                                Login to Book or Swap
+                            </a>
+                            {% endif %}
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -221,7 +228,7 @@
                                         class="fw-semibold reviewer-name">{{review.booking.requester.user.get_full_name|default:review.booking.requester.user.username }}</span>
                                 </div>
                                 <div class="text-warning">
-                                    {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %} </div>
+                                    {% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}★{% else  %}☆{% endif %}{% endfor %} </div>
                                 </div>
                                 <p class="mb-1 text-dark">{{ review.comment }}</p>
                                 <small class="text-muted">{{ review.created_at|date:"F d, Y" }} • for {{ review.booking.skill.name }}</small>
@@ -317,7 +324,8 @@
         .text-dark1 {
             color: #000 !important;
         }
-        .body.dark-mode .text-dark1{
+
+        .body.dark-mode .text-dark1 {
             color: #000 !important;
         }
 

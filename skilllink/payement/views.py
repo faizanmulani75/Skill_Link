@@ -16,9 +16,13 @@ def initiate_payment(request):
         try:
             tokens = int(tokens)
             if tokens <= 0:
-                raise ValueError
+                messages.error(request, "Token amount must be greater than zero.")
+                return redirect('token_balance')
+            if tokens > 1000:
+                messages.error(request, "Maximum 1000 tokens can be purchased at once.")
+                return redirect('token_balance')
         except (TypeError, ValueError):
-            messages.error(request, f"Please enter a valid number of tokens. Received: {tokens}")
+            messages.error(request, "Please enter a valid integer for tokens.")
             return redirect('token_balance')
 
         amount_in_paise = tokens * 100

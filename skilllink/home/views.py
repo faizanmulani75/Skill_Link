@@ -60,6 +60,7 @@ def index(request):
             "image": "https://wallpapers-clan.com/wp-content/uploads/2023/06/cool-pfp-02.jpg",
             "social": {
                 "instagram": "https://instagram.com/faizan.m_75",
+                "github": "https://github.com/faizanmulani75"
             }
         },
         {

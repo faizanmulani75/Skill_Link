@@ -19,8 +19,9 @@
           {% csrf_token %}
           <div class="mb-3">
             <label for="tokens" class="form-label fw-semibold text-dark">Amount of Tokens</label>
-            <input type="number" name="tokens" id="tokens" min="1" class="form-control shadow-sm"
+            <input type="number" name="tokens" id="tokens" min="1" max="1000" class="form-control shadow-sm"
               placeholder="Enter number of tokens" required style="border-radius: 12px;">
+            <div class="form-text text-muted small mt-1">Min: 1, Max: 1000 tokens per purchase.</div>
           </div>
           <div class="d-grid">
             <button type="submit" class="btn btn-theme fw-bold shadow-sm">
@@ -54,8 +55,8 @@
                 <td class="text-capitalize">{{ tx.transaction_type }}</td>
                 <td>{{ tx.description }}</td>
                 <td
-                  class="text-end fw-bold {% if tx.transaction_type in 'earned,purchased' %}text-success{% else %}text-danger{% endif %}">
-                  {% if tx.transaction_type in 'earned,purchased' %}+{% else %}-{% endif %}{{ tx.amount }}
+                  class="text-end fw-bold {% if tx.transaction_type in 'earned,purchased,bonus,refund' %}text-success{% else %}text-danger{% endif %}">
+                  {% if tx.transaction_type in 'earned,purchased,bonus,refund' %}+{% else %}-{% endif %}{{ tx.amount }}
                 </td>
               </tr>
               {% endfor %}

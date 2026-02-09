@@ -93,8 +93,12 @@ def register_page(request):
         password2 = request.POST.get("password2")
 
         # ✅ Validate input fields
-        if not username or not email or not password1:
+        if not username or not email or not password1 or not password2:
             messages.error(request, "All fields are required")
+            return redirect("register")
+
+        if password1 != password2:
+            messages.error(request, "Passwords do not match")
             return redirect("register")
 
         # Validate Username (Alphanumeric + underscores)
@@ -143,6 +147,7 @@ def register_page(request):
         request.session["reg_email"] = email
         request.session["reg_password"] = password1
         request.session["reg_otp"] = otp
+        request.session["reg_otp_created_at"] = timezone.now().timestamp()
 
         messages.info(request, "OTP sent to your email. Please verify.")
         return redirect("verify_otp")
@@ -177,9 +182,24 @@ def verify_otp(request):
         messages.error(request, "Session expired or invalid. Please register again.")
         return redirect("register")
 
+    # Calculate remaining time
+    created_at = request.session.get("reg_otp_created_at", 0)
+    now = timezone.now().timestamp()
+    elapsed = now - created_at
+    remaining_seconds = max(0, int(600 - elapsed))
+
+    if remaining_seconds <= 0:
+        # Clear session and force re-registration
+        for key in ["reg_username", "reg_email", "reg_password", "reg_otp", "reg_otp_created_at"]:
+            request.session.pop(key, None)
+        messages.error(request, "OTP has expired. Please register again.")
+        return redirect("register")
+
     if request.method == "POST":
-        entered_otp = request.POST.get("otp")
+        entered_otp = request.POST.get("otp", "").strip()
         session_otp = request.session.get("reg_otp")
+
+        print(f"DEBUG: Comparing Entered OTP '{entered_otp}' with Session OTP '{session_otp}'")
 
         if entered_otp == session_otp:
             # ✅ create user
@@ -191,17 +211,18 @@ def verify_otp(request):
             login(request, user)
 
             # ✅ clear session data
-            for key in ["reg_username", "reg_email", "reg_password", "reg_otp"]:
+            for key in ["reg_username", "reg_email", "reg_password", "reg_otp", "reg_otp_created_at"]:
                 request.session.pop(key, None)
 
             messages.success(request, "Registration complete!")
             return redirect("dashboard")
 
         else:
+            print("DEBUG: OTP Mismatch!")
             messages.error(request, "Incorrect OTP")
             return redirect("verify_otp")
 
-    return render(request, "verify_otp.html")
+    return render(request, "verify_otp.html", {"remaining_seconds": remaining_seconds, "email": request.session.get("reg_email")})
 
 
 # ---------------- RESEND OTP ----------------
@@ -213,16 +234,16 @@ def resend_otp(request):
     if not email:
         return JsonResponse({"success": False, "message": "Session expired"}, status=400)
 
-    # Generate new OTP
-    otp = str(random.randint(100000, 999999))
-    request.session["reg_otp"] = otp
-
     try:
-        send_otp_email(email, otp, username)
+        print(f"DEBUG: Resending OTP for {email}")
+        otp = send_otp(email)
+        request.session["reg_otp"] = otp
+        request.session["reg_otp_created_at"] = timezone.now().timestamp()
+        print(f"DEBUG: New OTP stored in session: {otp}")
         return JsonResponse({"success": True, "message": "OTP resent successfully"})
     except Exception as e:
         print("Resend OTP failed:", e)
-        return JsonResponse({"success": False, "message": "Failed to resend OTP"}, status=500)
+        return JsonResponse({"success": False, "message": f"Failed to resend OTP: {str(e)}"}, status=500)
 
 
 
@@ -274,11 +295,22 @@ def add_skill(request):
             # Validation: Token Cost
             try:
                 token_cost = int(token_cost)
-                if token_cost < 0:
-                    messages.error(request, "Token cost cannot be negative.")
+                max_allowed = request.user.profile.get_max_token_cost
+                if token_cost < 0 or token_cost > max_allowed:
+                    messages.error(request, f"Token cost must be between 0 and {max_allowed} based on your level.")
                     return redirect("add_skill")
             except ValueError:
                 messages.error(request, "Invalid token cost.")
+                return redirect("add_skill")
+
+            # Validation: Description length
+            if len(personal_description) > 500:
+                messages.error(request, "Personal description exceeds 500 characters.")
+                return redirect("add_skill")
+
+            # Validation: Image size (5MB)
+            if skill_icon and skill_icon.size > 5 * 1024 * 1024:
+                messages.error(request, "Skill icon too large ( > 5MB ).")
                 return redirect("add_skill")
 
             skill_obj, _ = Skill.objects.get_or_create(name=skill_name)
@@ -305,7 +337,9 @@ def add_skill(request):
             return redirect("profile_edit")
         else:
             messages.error(request, "Please enter a skill name.")
-    return render(request, "skill_add.html")
+    
+    max_tokens = request.user.profile.get_max_token_cost
+    return render(request, "skill_add.html", {'max_tokens': max_tokens})
 
 
 @login_required
@@ -328,13 +362,13 @@ def edit_skill(request, pk):
     profile = request.user.profile
     skill_instance = get_object_or_404(ProfileSkill, pk=pk, profile=profile)
     if request.method == "POST":
-        form = ProfileSkillForm(request.POST, instance=skill_instance)
+        form = ProfileSkillForm(request.POST, instance=skill_instance, profile=profile)
         if form.is_valid():
             form.save()
             messages.success(request, f"Skill '{skill_instance.skill.name}' updated successfully.")
             return redirect("profile_edit")
     else:
-        form = ProfileSkillForm(instance=skill_instance)
+        form = ProfileSkillForm(instance=skill_instance, profile=profile)
     return render(request, "skill_edit.html", {"form": form, "skill_instance": skill_instance})
 
 

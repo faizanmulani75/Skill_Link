@@ -113,24 +113,36 @@ def booking_update_status(request, booking_id, action):
         messages.success(request, "Booking accepted. Provider will schedule the meeting.")
 
     elif action == "reject" and user_profile == booking.provider:
-        booking.status = "canceled"
-        booking.save()
-        booking.requester.add_tokens(
-            booking.tokens_spent,
-            transaction_type='refund',
-            description=f"Refund for rejected booking {booking.skill.name}"
-        )
-        messages.info(request, "Booking rejected. Tokens refunded.")
+        with transaction.atomic():
+            booking.refresh_from_db()
+            if booking.status != "cancelled" and not booking.tokens_refunded:
+                booking.status = "cancelled"
+                booking.tokens_refunded = True
+                booking.save()
+                booking.requester.add_tokens(
+                    booking.tokens_spent,
+                    transaction_type='refund',
+                    description=f"Refund for rejected booking {booking.skill.name}"
+                )
+                messages.info(request, "Booking rejected. Tokens refunded.")
+            else:
+                messages.warning(request, "Booking is already rejected or refunded.")
 
     elif action == "cancel" and user_profile == booking.requester:
-        booking.status = "canceled"
-        booking.save()
-        booking.requester.add_tokens(
-            booking.tokens_spent,
-            transaction_type='refund',
-            description=f"Refund for canceled booking {booking.skill.name}"
-        )
-        messages.info(request, "Booking canceled. Tokens refunded.")
+        with transaction.atomic():
+            booking.refresh_from_db()
+            if booking.status != "cancelled" and not booking.tokens_refunded:
+                booking.status = "cancelled"
+                booking.tokens_refunded = True
+                booking.save()
+                booking.requester.add_tokens(
+                    booking.tokens_spent,
+                    transaction_type='refund',
+                    description=f"Refund for cancelled booking {booking.skill.name}"
+                )
+                messages.info(request, "Booking cancelled. Tokens refunded.")
+            else:
+                messages.warning(request, "Booking is already cancelled or refunded.")
 
     else:
         messages.error(request, "Invalid action or permission.")

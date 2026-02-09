@@ -118,6 +118,7 @@
             {% endif %}
 
             <div class="card-overlay d-flex flex-column align-items-center justify-content-center gap-2">
+              {% if request.user.is_authenticated %}
               {% if card.provider.profile.user == request.user %}
               <span class="badge bg-secondary">Your Listing</span>
               {% else %}
@@ -125,6 +126,9 @@
                 class="btn btn-warning rounded-pill px-4 fw-bold">Request Session</a>
               <a href="{% url 'request_swap' card.skill.id card.provider.profile.id %}"
                 class="btn btn-outline-light rounded-pill px-4 fw-bold mt-2 hover-scale">Request Swap</a>
+              {% endif %}
+              {% else %}
+              <a href="{% url 'login' %}" class="btn btn-warning rounded-pill px-4 fw-bold">Login to Book or Swap</a>
               {% endif %}
             </div>
           </div>
@@ -658,7 +662,7 @@
       background: #1e1e1e !important;
     }
 
-   
+
     .card-img-top .card-overlay .btn {
       flex: 1;
       opacity: 1 !important;
@@ -669,14 +673,14 @@
       white-space: nowrap;
     }
 
-    
+
     .card-img-top .card-overlay .badge {
       width: 100%;
       padding: 10px;
       margin: 0 !important;
     }
 
-   
+
     .card-img-top .card-overlay .btn-outline-light {
       color: var(--text-primary) !important;
       border-color: var(--text-primary) !important;
