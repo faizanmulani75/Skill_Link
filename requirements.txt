@@ -51,3 +51,5 @@ gunicorn==24.1.1
 psycopg[binary,pool]
 djangorestframework
 django-cors-headers
+sib-api-v3-sdk
+django-environ
